@@ -1,6 +1,16 @@
-var dnsd = require('dnsd')
-dnsd.createServer(function(req,res){
-	res.end('1.1.1.1')
-}).listen(5555,'127.0.0.1')
+const p2p = require('./p2p');
+const rsa = require('./rsa.js');
 
-console.log('Server running at 127.0.0.1:5555')
+const PEER_PORT = 5353;
+const DNS_PORT = 5555;
+
+var dnsd = require('dnsd');
+dnsd.createServer(resolve).listen(DNS_PORT,'localhost');
+console.log("DNS Server running at "+"localhost"+":"+DNS_PORT);
+
+var peer = p2p('localhost',PEER_PORT);
+
+
+function resolve(req,res){
+
+}

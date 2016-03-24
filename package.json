@@ -1,0 +1,25 @@
+{
+  "name": "dnp2p",
+  "version": "1.0.0",
+  "description": "A Nodejs Implementation of P2P DNS Server",
+  "main": "server.js",
+  "dependencies": {
+    "node-rsa": "^0.3.2",
+    "dnsd": "^0.9.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haydenz/DNP2P-Nodejs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/haydenz/DNP2P-Nodejs/issues"
+  },
+  "homepage": "https://github.com/haydenz/DNP2P-Nodejs#readme"
+}
