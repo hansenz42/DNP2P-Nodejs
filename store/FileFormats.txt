@@ -1,0 +1,8 @@
+#cache.csv
+domain,answer,from_whom_public_key
+
+#wellKnownPeers.csv
+address,port
+
+#trust.csv
+pulic_key,fame

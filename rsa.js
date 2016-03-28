@@ -1,5 +1,5 @@
-var PRIVATE_KEY_PATH = 'store/pri_key.txt';
-var PUBLIC_KEY_PATH = 'store/pub_key.txt';
+var PRIVATE_KEY_PATH = 'store/pri_key.dat';
+var PUBLIC_KEY_PATH = 'store/pub_key.dat';
 const KEY_BITS = 512;
 const ENCRYPTE_ENCODE = 'base64';
 

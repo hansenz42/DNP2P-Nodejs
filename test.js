@@ -1,10 +1,16 @@
-var async_function = function(val, callback){
-    process.nextTick(function(){
-        callback(val);
-    });
-};
+const EventEmitter = require('events');
 
-async_function(42, function(val) {
-  console.log(val)
-});
-console.log(43);
+var em = new EventEmitter();
+
+function caller(callback){
+	em.on('event',(a)=>{callback(a);});
+}
+
+function a(){console.log(a);}
+caller(a);
+caller((b)=>{console.log(b+1)});
+
+
+em.removeListener('event',a);
+
+em.emit('event',5);
