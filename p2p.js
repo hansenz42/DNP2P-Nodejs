@@ -2,14 +2,13 @@ const WELL_KNOWN_PEERS_PATH = "store/wellknownpeers.json";
 const CACHE_PATH = "store/cache.json";
 const TRUST_PATH = "store/trust.json";
 const ANSWER_TIMEOUT = 10000;
+const SAVE_RECORDS_INTERVAL = 30000;
 const REQUEST_TTL = 10;
 
-const parser = require('csv-parse/lib/sync');
-const stringify = require('csv-stringify');
 const p2p = require('p2p');
 const fs = require('fs');
 const EventEmitter = require('events');
-const rsa = require('rsa');
+const rsa = require('./rsa.js');
 
 var RespondEvent = new EventEmitter();
 
@@ -26,97 +25,125 @@ Command: pushAnswer
 Payload: request, answer, public_key
  */
 
-function PeerServer(address,port){
-	var well_known_peers = loadWellKnownPeer(WELL_KNOWN_PEERS_PATH);
-	this.peer = p2p.peer({host: address,port: port, wellKnowPeer: well_known_peers});
-	this.peer.handle.search = search.bind(this);
-	this.peer.handle.askNewPeer = askNewPeer.bind(this);
-	this.peer.handle.getAnswer = getAnswer.bind(this);
-	this.peer_list = well_known_peers;
-	this.trust_list = this.loadcsv(TRUST_PATH);
-	this.cache = this.loadcsv(CACHE_PATH);
-	this.rsa = new rsa();
+function PeerServer(address, port) {
+    var well_known_peers = this.loadJSON(WELL_KNOWN_PEERS_PATH);
+    this.peer = p2p.peer({ host: address, port: port, wellKnownPeers: well_known_peers });
+    this.peer.handle.search = search.bind(this);
+    this.peer.handle.askNewPeer = askNewPeer.bind(this);
+    this.peer.handle.answer = answer.bind(this);
+    this.peer_list = well_known_peers;
+    this.trust_list = this.loadJSON(TRUST_PATH);
+    this.cache = this.loadJSON(CACHE_PATH);
+    this.rsa = new rsa();
 
-	console.log("P2P peer running at "+address+':'+port);
+    setInterval(this.saveRecords(), SAVE_RECORDS_INTERVAL);
+    console.log("P2P peer running at " + address + ':' + port);
 }
 
-PeerServer.prototype.requestDomain = function (request, callback){
-	for (var ele_peer in this.peer_list){
-		this.peer.remote(ele_peer).run('handle/search',
-			{
-				request:request,
-				respondTo:{
-					address:this.peer.self.address,
-					port:this.peer.self.port
-				},
-				TTL:REQUEST_TTL
-			},(err,result)=>{if (err){console.log(err);}});
+PeerServer.prototype.setCache = function (request,answer,from){
+	if (!from){
+		from = this.rsa.getPubKey();
 	}
-
-	var resolver = function(request,answer){callback(request,answer);};
-
-	RespondEvent.on('answer',resolve);
-	setTimeout(()=>{RespondEvent.removeListener('answer',resolve);},ANSWER_TIMEOUT);
+	if (this.cache['request']) {
+        this.cache['request'].push({ answer: answer, from: from }); //TODO
+    } else {
+        this.cache['request'] = [{ answer: answer, from: from }];
+    }
 }
 
-PeerServer.prototype.answerVaild = function(request, answer){
+PeerServer.prototype.saveRecords = function() {
+    this.saveJSON(TRUST_PATH, this.trust_list);
+    this.saveJSON(CACHE_PATH, this.cache);
+    this.saveJSON(WELL_KNOWN_PEERS_PATH, this.peer.wellknownpeers.get());
+}
+
+PeerServer.prototype.saveJSON = function(path, data) {
+    var raw = JSON.stringify(data);
+    fs.writeFileSync(path, raw);
+}
+
+PeerServer.prototype.loadJSON = function(path) {
+    var raw = fs.readFileSync(path);
+    return JSON.parse(raw);
+}
+
+PeerServer.prototype.requestDomain = function(request, callback) {
+    var success = false;
+    this.searchNeighbor(request, { address: this.peer.self.address, port: this.peer.self.port }, REQUEST_TTL);
+
+    var resolver = function(request, answer) {
+        callback(request, answer);
+        success = true
+    };
+
+    RespondEvent.on('answer', resolver);
+    setTimeout(() => {
+        RespondEvent.removeListener('answer', resolve);
+        if (!success) {
+            callback(request, null);
+        }
+    }, ANSWER_TIMEOUT);
+}
+
+PeerServer.prototype.searchNeighbor = function(request, respondTo, ttl) {
+    for (var ele_peer in this.peer_list) {
+        this.peer.remote(ele_peer).run('handle/search', {
+            request: request,
+            respondTo: {
+                address: this.peer.self.address,
+                port: this.peer.self.port
+            },
+            TTL: ttl
+        }, (err, result) => {
+            if (err) { console.log(err); } });
+    }
+}
+
+PeerServer.prototype.replyRequest = function(request, answer, to_peer) {
+    this.peer.remote(to_peer).run('handle/getAnswer', {
+        request: request,
+        answer: answer,
+        public_key: this.rsa.getPubKey()
+    }, (err, result) => {
+        if (err) { console.log(err); } });
+}
+
+PeerServer.prototype.testVaild = function(request, answer) {
 
 }
 
-PeerServer.prototype.answerFail = function(request, answer){
+PeerServer.prototype.testFail = function(request, answer) {
 
-}
-
-PeerServer.prototype.loadcsv = loadcsv;
-
-function loadcsv(path){
-	try{
-		var raw = fs.readFileSync(path);
-		var records = parse(raw);
-	}catch(e){
-		return [];
-	}
-	return records;
-}
-
-PeerServer.prototype.savecsv = savecsv;
-
-function savecsv(path,data){
-	stringify(data,function (err,output){
-		fs.writeFileSync(this.path, output);
-	});
-}
-
-function loadWellKnownPeer(path) {
-	var res = []
-	var data = loadcsv(WELL_KNOWN_PEERS_PATH);
-	for (var ele in data) {
-		res.push({address:ele[0],port:ele[1]});
-	}
-	return res;
 }
 
 function search(payload, done) {
-	//check local cache
-	//forward to neighbors
+    //check local cache
+    //forward to neighbors
+    var request = payload['request'];
+    var respondTo = payload['respondTo'];
+    var ttl = payload['TTL'];
+
+    if (this.cache['request']) {
+        var answer = this.cache['request'][0]['answer']; //TODO
+        this.replyRequest(request, answer, respondTo);
+    }
+
+    ttl -= 1;
+    this.searchNeighbor(request, respondTo, ttl);
 }
 
-function askNewPeer(payload, done){
-	//return new neighbor to sender
+function askNewPeer(payload, done) {
+    //return new neighbor to sender
 }
 
-function getAnswer(payload, done){
-	//get answer and public key
-	//put answer into cache
-	var request = payload['request'];
-	var answer = payload['answer'];
-	var pubkey = payload['public_key'];
-	if (this.cache.request){
-
-	}else{
-
-	}
-	RespondEvent.emit('answer',request,answer);
+function answer(payload, done) {
+    //get answer and public key
+    //put answer into cache
+    var request = payload['request'];
+    var answer = payload['answer'];
+    var pubkey = payload['public_key'];
+    this.setCache(request,answer,pubkey);
+    RespondEvent.emit('answer', request, answer);
 }
 
 module.exports = PeerServer;

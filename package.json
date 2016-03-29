@@ -1,6 +1,6 @@
 {
   "name": "dnp2p",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A Nodejs Implementation of P2P DNS Server",
   "main": "server.js",
   "dependencies": {

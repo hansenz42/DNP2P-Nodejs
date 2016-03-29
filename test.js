@@ -1,16 +1,1 @@
-const EventEmitter = require('events');
-
-var em = new EventEmitter();
-
-function caller(callback){
-	em.on('event',(a)=>{callback(a);});
-}
-
-function a(){console.log(a);}
-caller(a);
-caller((b)=>{console.log(b+1)});
-
-
-em.removeListener('event',a);
-
-em.emit('event',5);
+console.log(JSON.parse('{"backupdns":["8.8.8.8","8.8.4.4","208.67.222.222","208.67.220.220"],"system_dns":[]}'))
