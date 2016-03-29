@@ -48,12 +48,7 @@ PeerServer.prototype.requestDomain = function(request, callback) {
     var success = false;
     this.searchNeighbor(request, { address: this.peer.self.address, port: this.peer.self.port }, REQUEST_TTL);
 
-    var resolver = function(request, answer) {
-        callback(request, answer);
-        success = true
-    };
-
-    RespondEvent.on('answer', resolver);
+    RespondEvent.on('answer', function(request, answer){callback(request, answer); success = true;});
     setTimeout(() => {
         RespondEvent.removeListener('answer', resolve);
         if (!success) {
@@ -67,10 +62,7 @@ PeerServer.prototype.searchNeighbor = function(request, respondTo, ttl) {
     for (var ele_peer in this.peer_list) {
         this.peer.remote(ele_peer).run('handle/search', {
             request: request,
-            respondTo: {
-                address: this.peer.self.address,
-                port: this.peer.self.port
-            },
+            respondTo: respondTo,
             TTL: ttl
         }, (err, result) => {
             if (err) { console.log(err); }
@@ -106,18 +98,19 @@ function search(payload, done) {
     var respondTo = payload['respondTo'];
     var ttl = payload['TTL'];
 
-
     var answer = this.store_con.getCache(request);
-    if (answer.length > 0) {
+    if (answer.length > 0)
         this.replyRequest(request, answer, respondTo);
-    }
 
     ttl -= 1;
-    this.searchNeighbor(request, respondTo, ttl);
+    if (ttl>0)
+        this.searchNeighbor(request, respondTo, ttl);
+    done('success');
 }
 
 function exchangePeer(payload, done) {
     //return new neighbor to sender
+    done(this.store_con.peer_list);
 }
 
 function answer(payload, done) {
@@ -128,9 +121,10 @@ function answer(payload, done) {
     var pubkey = payload['public_key'];
     this.store_con.setCache(request, answer, pubkey);
     RespondEvent.emit('answer', request, answer);
+    done('success')
 }
 
 function exchangeTrust(payload, done) {
-
+    done(this.store_con.trust_list);
 }
 module.exports = PeerServer;
