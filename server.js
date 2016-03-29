@@ -20,14 +20,13 @@ var peer = p2p('localhost', PEER_PORT);
 
 function resolve(req, res) {
     var question = res.question[0];
-    var hostname = question.name;
+    var hostname = url.parse(question.name)[hostname];
     var length = hostname.length;
     var ttl = Math.floor(Math.random() * 3600);
 
     peer.requestDomain(question, function(req, ans) {
             if (ans) {
                 res.answer.push({ name: hostname, type: 'A', data: ans, 'ttl': ttl });
-                res.end();
                 test_res = test(ans);
                 if (test_res)
                     peer.answerVaild(question, ans);
@@ -35,26 +34,23 @@ function resolve(req, res) {
                     peer.answerFail(question, ans);
             } else {
                 dns.lookup(hostname, (err, reply, family) => {
-                		var address = reply['address'] || reply;
-                        res.answer.push({ name: hostname, type: 'A', data: address, 'ttl': ttl });
-                        res.end();
-                        if (err) { consonle.log(err); }
-                        test_res = test(address);
-                        if (test_res) {
-                            peer.setCache(hostname, address);
-                        }
+                    var address = reply['address'] || reply;
+                    res.answer.push({ name: hostname, type: 'A', data: address, 'ttl': ttl });
+                    if (err) { consonle.log(err); }
+                    test_res = test(address);
+                    if (test_res) {
+                        peer.store_con.setCache(hostname, address);
                     }
                 });
+            }
+            res.end();
         }
-    }
-});
+    });
 
 }
 
-function tailhostname(url){
 
-}
 
 function test(address) {
-	
+
 }

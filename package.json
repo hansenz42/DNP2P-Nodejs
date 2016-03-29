@@ -6,7 +6,8 @@
   "dependencies": {
     "node-rsa": "^0.3.2",
     "dnsd": "^0.9.6",
-    "p2p" : "^0.10.2"
+    "p2p": "^0.10.2",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {},
   "scripts": {
