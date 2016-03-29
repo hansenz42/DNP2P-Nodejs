@@ -34,11 +34,14 @@ function resolve(req, res) {
                 else
                     peer.answerFail(question, ans);
             } else {
-                dns.lookup(hostname, (err, address, family) => {
+                dns.lookup(hostname, (err, reply, family) => {
+                		var address = reply['address'] || reply;
+                        res.answer.push({ name: hostname, type: 'A', data: address, 'ttl': ttl });
+                        res.end();
                         if (err) { consonle.log(err); }
                         test_res = test(address);
                         if (test_res) {
-                        	peer.setCache(hostname,address);
+                            peer.setCache(hostname, address);
                         }
                     }
                 });
@@ -48,6 +51,10 @@ function resolve(req, res) {
 
 }
 
-function test(address) {
+function tailhostname(url){
 
+}
+
+function test(address) {
+	
 }

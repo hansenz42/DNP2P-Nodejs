@@ -5,7 +5,8 @@
   "main": "server.js",
   "dependencies": {
     "node-rsa": "^0.3.2",
-    "dnsd": "^0.9.6"
+    "dnsd": "^0.9.6",
+    "p2p" : "^0.10.2"
   },
   "devDependencies": {},
   "scripts": {

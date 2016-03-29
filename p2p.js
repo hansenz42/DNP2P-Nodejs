@@ -1,7 +1,7 @@
 const WELL_KNOWN_PEERS_PATH = "store/wellknownpeers.json";
 const CACHE_PATH = "store/cache.json";
 const TRUST_PATH = "store/trust.json";
-const ANSWER_TIMEOUT = 10000;
+const ANSWER_TIMEOUT = 1500;
 const SAVE_RECORDS_INTERVAL = 30000;
 const REQUEST_TTL = 10;
 
@@ -29,8 +29,9 @@ function PeerServer(address, port) {
     var well_known_peers = this.loadJSON(WELL_KNOWN_PEERS_PATH);
     this.peer = p2p.peer({ host: address, port: port, wellKnownPeers: well_known_peers });
     this.peer.handle.search = search.bind(this);
-    this.peer.handle.askNewPeer = askNewPeer.bind(this);
+    this.peer.handle.exchangePeer = exchangePeer.bind(this);
     this.peer.handle.answer = answer.bind(this);
+    this.peer.handle.exchangeTrust = exchangeTrust.bind(this);
     this.peer_list = well_known_peers;
     this.trust_list = this.loadJSON(TRUST_PATH);
     this.cache = this.loadJSON(CACHE_PATH);
@@ -44,10 +45,15 @@ PeerServer.prototype.setCache = function (request,answer,from){
 	if (!from){
 		from = this.rsa.getPubKey();
 	}
-	if (this.cache['request']) {
-        this.cache['request'].push({ answer: answer, from: from }); //TODO
+	if (this.cache[request]) {
+		if (this.cache[request][answer]) {
+			this.cache[request][answer].push(from);
+		} else {
+			this.cache[request][answer] = [from];
+		}
     } else {
-        this.cache['request'] = [{ answer: answer, from: from }];
+        this.cache[request] = {};
+        this.cache[request][answer] = [from];
     }
 }
 
@@ -132,7 +138,7 @@ function search(payload, done) {
     this.searchNeighbor(request, respondTo, ttl);
 }
 
-function askNewPeer(payload, done) {
+function exchangePeer(payload, done) {
     //return new neighbor to sender
 }
 
@@ -146,4 +152,7 @@ function answer(payload, done) {
     RespondEvent.emit('answer', request, answer);
 }
 
+function exchangeTrust(payload, done){
+
+}
 module.exports = PeerServer;

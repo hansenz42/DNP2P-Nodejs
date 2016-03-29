@@ -1,1 +1,7 @@
-console.log(JSON.parse('{"backupdns":["8.8.8.8","8.8.4.4","208.67.222.222","208.67.220.220"],"system_dns":[]}'))
+var dnsd = require('dnsd');
+
+dnsd.createServer(resolve).listen(53, 'localhost');
+
+function resolve(req,res){
+	console.log(req);
+}
