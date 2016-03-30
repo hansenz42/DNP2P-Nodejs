@@ -1,9 +1,8 @@
-function main(){
-	process.nextTick(function(){
-	console.log('over');
-	while (true){
+function c(){
+	var that = this;
+	setInterval(function(){this.do();}.bind(this),2000);
+}
 
-	}
-})}
+c.prototype.do = function(){console.log(1);}
 
-main();
+var a = new c();

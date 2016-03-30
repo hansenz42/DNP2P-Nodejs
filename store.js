@@ -1,4 +1,3 @@
-const WELL_KNOWN_PEERS_PATH = "store/wellknownpeers.json";
 const CACHE_PATH = "store/cache.json";
 const TRUST_PATH = "store/trust.json";
 const GET_CACHE_NUM = 3;
@@ -27,6 +26,9 @@ StoreControl.prototype.saveRecords = function() {
 }
 
 StoreControl.prototype.setCache = function(request, answer, from) {
+	assert(typeof(request) == 'string');
+	assert(typeof(answer) == 'string');
+	
     if (!from) {
         from = this.rsa.getPubKey();
     }
@@ -43,6 +45,7 @@ StoreControl.prototype.setCache = function(request, answer, from) {
 }
 
 StoreControl.prototype.getCache = function(request) {
+	assert(typeof(request) == 'string');
     var res = [];
     for (var address in this.cache['request']) {
         var pub_ids = this.cache['request'][address];
@@ -64,6 +67,7 @@ StoreControl.prototype.getCache = function(request) {
 }
 
 StoreControl.prototype.getTrust = function(id) {
+	assert(typeof(id) == 'string');
     if (id == this.rsa.getPubKey()) {
         return 99999999;
     } else {
@@ -72,6 +76,7 @@ StoreControl.prototype.getTrust = function(id) {
 }
 
 StoreControl.prototype.setTrust = function(id,trust) {
+	assert(typeof(id) == 'string');
 	this.trust_list[id] = trust;
 }
 

@@ -2,11 +2,13 @@ const ANSWER_TIMEOUT = 1500;
 const HOUSEKEEP_INTERVAL = 30000;
 const REQUEST_TTL = 10;
 const IGNORE_TIMEOUT = 10000;
+const WELL_KNOWN_PEERS_PATH = "store/wellknownpeers.json";
 
 const p2p = require('p2p');
 const fs = require('fs');
 const EventEmitter = require('events');
 const _ = require('underscore');
+const ping = require('ping');
 const rsa = require('./rsa.js');
 const store = require('./store.js');
 
@@ -25,29 +27,53 @@ Command: pushAnswer
 Payload: request, answer, public_key
  */
 
-function PeerServer(address, port) {
+function PeerServer(address, port, seeds) {
+    assert(Array.isArray(seeds));
     this.store_con = new store();
-    var well_known_peers = this.store_con.loadJSON(WELL_KNOWN_PEERS_PATH);
-    this.peer = p2p.peer({ host: address, port: port, wellKnownPeers: well_known_peers });
+    this.peer = p2p.peer({ host: address, port: port, wellKnownPeers: seeds});
     this.peer.handle.search = search.bind(this);
     this.peer.handle.exchangePeer = exchangePeer.bind(this);
     this.peer.handle.answer = answer.bind(this);
     this.peer.handle.exchangeTrust = exchangeTrust.bind(this);
     this.peer_list = well_known_peers;
     this.ignore_list = {};
-
     this.rsa = new rsa();
 
-    setInterval(this.houseKeep(), HOUSEKEEP_INTERVAL);
+    setInterval(function(){this.maintain();}.bind(this), HOUSEKEEP_INTERVAL);
     console.log("P2P peer running at " + address + ':' + port);
 }
 
-PeerServer.prototype.houseKeep = function() {
-    this.store_con.saveJSON(WELL_KNOWN_PEERS_PATH, this.peer.wellknownpeers.get());
+PeerServer.prototype.addPeer = function(peer){
+    this.peer_list.push(peer);
+}
+
+PeerServer.prototype.removePeer = function(peer){
+    for (var e in this.peer_list){
+        if(_isEqual(peer,e)){
+            delete e;
+        }
+    }
+    _.compact(this.peer_list);
+}
+
+PeerServer.prototype.maintain = function() {
+    console.log('P2P: doing housekeeping');
+    this.cleanPeer();
     this.store_con.saveRecords();
 }
 
+PeerServer.prototype.cleanPeer = function(){
+    this.peer_list.forEach(function(ele,i){
+        ping.sys.probe(ele['address'],function(isAlive){
+            if(!isAlive){
+                this.removePeer(ele['address']);
+            }
+        }.bind(this))
+    });
+}
+
 PeerServer.prototype.requestDomain = function(request, callback) {
+    assert(type(request) == 'string');
     var success = false;
     this.searchNeighbor(request, { address: this.peer.self.address, port: this.peer.self.port }, REQUEST_TTL);
 
@@ -130,6 +156,9 @@ function search(payload, done) {
     var request = payload['request'];
     var respondTo = payload['respondTo'];
     var ttl = payload['TTL'];
+    assert(request);
+    assert(respondTo);
+    assert(ttl);
 
     if (this.checkIgnore(request,respondTo)){
         done('ignored');
@@ -162,6 +191,10 @@ function answer(payload, done) {
     var request = payload['request'];
     var answer = payload['answer'];
     var pubkey = payload['public_key'];
+    assert(request);
+    assert(answer);
+    assert(pubkey);
+
     this.store_con.setCache(request, answer, pubkey);
     RespondEvent.emit('answer', request, answer);
     done('answer got');

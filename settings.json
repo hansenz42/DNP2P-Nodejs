@@ -1,4 +1,5 @@
 {
 	"backup_dns":["8.8.8.8","8.8.4.4","208.67.222.222","208.67.220.220"],
-	"system_dns":[]
+	"system_dns":[],
+	"seed_peers":[{"host":"localhost","port":5555}]
 }

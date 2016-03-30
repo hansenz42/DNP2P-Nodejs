@@ -7,7 +7,8 @@
     "node-rsa": "^0.3.2",
     "dnsd": "^0.9.6",
     "p2p": "^0.10.2",
-    "underscore": "^1.8.3"
+    "underscore": "^1.8.3",
+    "ping":"^0.1.10"
   },
   "devDependencies": {},
   "scripts": {
