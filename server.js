@@ -7,6 +7,7 @@ const SETTING_PATH = 'settings.json';
 const dnsd = require('dnsd');
 const dns = require('dns');
 const fs = require('fs');
+const ping = require('ping');
 
 var raw_servers = JSON.parse(fs.readFileSync(path, options));
 var servers = raw_servers['system_dns'].concat(raw_servers['backup_dns']);
@@ -26,21 +27,16 @@ function resolve(req, res) {
 
     peer.requestDomain(question, function(req, ans) {
             if (ans) {
-                res.answer.push({ name: hostname, type: 'A', data: ans, 'ttl': ttl });
-                test_res = test(ans);
-                if (test_res)
-                    peer.answerVaild(question, ans);
-                else
-                    peer.answerFail(question, ans);
+            	for(var e in ans){
+            		res.answer.push({ name: hostname, type: 'A', data: e, 'ttl': ttl });
+            		test_res = test(question,ans,peer.testVaild,peer.testFail);
+            	}
             } else {
                 dns.lookup(hostname, (err, reply, family) => {
+                	if (err) {consonle.log(err); return;}
                     var address = reply['address'] || reply;
                     res.answer.push({ name: hostname, type: 'A', data: address, 'ttl': ttl });
-                    if (err) { consonle.log(err); }
-                    test_res = test(address);
-                    if (test_res) {
-                        peer.store_con.setCache(hostname, address);
-                    }
+                    test_res = test(question,address,peer.store_con.setCache,null);
                 });
             }
             res.end();
@@ -51,6 +47,13 @@ function resolve(req, res) {
 
 
 
-function test(address) {
-
+function test(question,address,vaild,fail) {
+	ping.sys.probe(address,function(isAlive){
+		if (isAlive){
+			if(valid) valid(question,address);
+		}
+		else{
+			if(fail) fail(question,address);
+		}
+	});
 }

@@ -1,10 +1,12 @@
 const ANSWER_TIMEOUT = 1500;
 const HOUSEKEEP_INTERVAL = 30000;
 const REQUEST_TTL = 10;
+const IGNORE_TIMEOUT = 10000;
 
 const p2p = require('p2p');
 const fs = require('fs');
 const EventEmitter = require('events');
+const _ = require('underscore');
 const rsa = require('./rsa.js');
 const store = require('./store.js');
 
@@ -32,6 +34,7 @@ function PeerServer(address, port) {
     this.peer.handle.answer = answer.bind(this);
     this.peer.handle.exchangeTrust = exchangeTrust.bind(this);
     this.peer_list = well_known_peers;
+    this.ignore_list = {};
 
     this.rsa = new rsa();
 
@@ -89,14 +92,54 @@ PeerServer.prototype.testFail = function(request, answer) {
 
 }
 
+PeerServer.prototype.checkIgnore = function(request,from_peer){
+    if (this.ignore_list[request]){
+        if (this.ignore_list[request].indexOf(from_peer['address']) != -1){
+            return true;
+        }
+    }
+    return false;
+}
+
+PeerServer.prototype.setIgnore = function(request,from_peer){
+    if (this.ignore_list[request]){
+        if (this.ignore_list[request].indexOf(from_peer['address']) == -1){
+            this.ignore_list[request].push(from_peer['address']);
+        }
+    } else {
+        this.ignore_list[request] = [from_peer['address']];
+    }
+}
+
+PeerServer.prototype.delIgnore = function(request,from_peer){
+    if (this.ignore_list[request]){
+        this.ignore_list[request] = _.without(this.ignore_list[request],from_peer['address']);
+    }
+    if (this.ignore_list[request].length == 0){
+        delete this.ignore_list[request];
+    }
+    
+}
+
 //Handler functions for Peer
 
 function search(payload, done) {
+    //check if the request is in the ignore list.
     //check local cache
     //forward to neighbors
     var request = payload['request'];
     var respondTo = payload['respondTo'];
     var ttl = payload['TTL'];
+
+    if (this.checkIgnore(request,respondTo)){
+        done('ignored');
+        return;
+    } else {
+        this.setIgnore(request,respondTo);
+        setTimeout(function(){
+            this.delIgnore(request,respondTo);
+        },IGNORE_TIMEOUT);
+    }
 
     var answer = this.store_con.getCache(request);
     if (answer.length > 0)
@@ -105,7 +148,7 @@ function search(payload, done) {
     ttl -= 1;
     if (ttl>0)
         this.searchNeighbor(request, respondTo, ttl);
-    done('success');
+    done('search checked');
 }
 
 function exchangePeer(payload, done) {
@@ -121,10 +164,11 @@ function answer(payload, done) {
     var pubkey = payload['public_key'];
     this.store_con.setCache(request, answer, pubkey);
     RespondEvent.emit('answer', request, answer);
-    done('success')
+    done('answer got');
 }
 
 function exchangeTrust(payload, done) {
     done(this.store_con.trust_list);
 }
+
 module.exports = PeerServer;

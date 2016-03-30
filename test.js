@@ -1,7 +1,9 @@
-var dnsd = require('dnsd');
+function main(){
+	process.nextTick(function(){
+	console.log('over');
+	while (true){
 
-dnsd.createServer(resolve).listen(53, 'localhost');
+	}
+})}
 
-function resolve(req,res){
-	console.log(req);
-}
+main();
