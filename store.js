@@ -4,10 +4,15 @@ const GET_CACHE_NUM = 3;
 
 const fs = require('fs');
 const _ = require('underscore');
+const assert = require('assert');
 
 function StoreControl() {
     this.trust_list = this.loadJSON(TRUST_PATH);
     this.cache = this.loadJSON(CACHE_PATH);
+    console.log('P2P STORE: import trust list');
+    console.log(this.trust_list);
+    console.log('P2P STORE: import cache');
+    console.log(this.cache);
 }
 
 StoreControl.prototype.saveJSON = function(path, data) {

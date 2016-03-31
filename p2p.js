@@ -11,6 +11,7 @@ const _ = require('underscore');
 const ping = require('ping');
 const rsa = require('./rsa.js');
 const store = require('./store.js');
+const assert = require('assert');
 
 var RespondEvent = new EventEmitter();
 
@@ -35,7 +36,7 @@ function PeerServer(address, port, seeds) {
     this.peer.handle.exchangePeer = exchangePeer.bind(this);
     this.peer.handle.answer = answer.bind(this);
     this.peer.handle.exchangeTrust = exchangeTrust.bind(this);
-    this.peer_list = well_known_peers;
+    this.peer_list = seeds;
     this.ignore_list = {};
     this.rsa = new rsa();
 

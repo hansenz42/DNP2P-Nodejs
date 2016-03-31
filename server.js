@@ -7,6 +7,7 @@ const dns = require('dns');
 const fs = require('fs');
 const ping = require('ping');
 const p2p = require('./p2p.js');
+const assert = require('assert');
 
 var settings = JSON.parse(fs.readFileSync(SETTING_PATH));
 var servers = settings['system_dns'].concat(settings['backup_dns']);

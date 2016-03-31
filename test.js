@@ -1,8 +1,9 @@
-function c(){
-	var that = this;
-	setInterval(function(){this.do();}.bind(this),2000);
-}
+// const p2p = require('./p2p.js');
 
-c.prototype.do = function(){console.log(1);}
+// var peer = new p2p('localhost', 5555,[{address:'localhost',port:5553}]);
 
-var a = new c();
+// // peer.requestDomain('google.com',function(hostname,ans){
+// // 	console.log(hostname);
+// // 	console.log(ans);
+// // })
+assert(true);
