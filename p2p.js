@@ -25,7 +25,7 @@ Return: {address, port}
 
 Command: pushAnswer
 Payload: request, answer, public_key
- */
+*/
 
 function PeerServer(address, port, seeds) {
     assert(Array.isArray(seeds));
