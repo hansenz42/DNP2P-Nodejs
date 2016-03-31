@@ -29,7 +29,7 @@ function resolve(req, res) {
         if (ans) {
             for (var e in ans) {
                 res.answer.push({ name: hostname, type: 'A', data: e, 'ttl': ttl });
-                test_res = test(question, ans, peer.testVaild, peer.testFail);
+                test(question, ans, peer.feedback);
             }
         } else {
             dns.lookup(hostname, (err, reply, family) => {
@@ -37,7 +37,7 @@ function resolve(req, res) {
                     return; }
                 var address = reply['address'] || reply;
                 res.answer.push({ name: hostname, type: 'A', data: address, 'ttl': ttl });
-                test_res = test(question, address, peer.store_con.setCache, null);
+                test(question, address, peer.store_con.setCache, null);
             });
         }
         res.end();
@@ -45,12 +45,9 @@ function resolve(req, res) {
 
 }
 
-function test(question, address, vaild, fail) {
+function test(question, address, callback) {
     ping.sys.probe(address, function(isAlive) {
-        if (isAlive) {
-            if (valid) valid(question, address);
-        } else {
-            if (fail) fail(question, address);
+        callback(question,address,isAlive);
         }
     });
 }
