@@ -2,6 +2,8 @@ const ANSWER_TIMEOUT = 1500;
 const HOUSEKEEP_INTERVAL = 30000;
 const REQUEST_TTL = 10;
 const IGNORE_TIMEOUT = 10000;
+const MIN_PEERS = 4;
+const MAX_PEERS = 10;
 const WELL_KNOWN_PEERS_PATH = "store/wellknownpeers.json";
 
 const p2p = require('p2p');
@@ -11,6 +13,7 @@ const _ = require('underscore');
 const ping = require('ping');
 const rsa = require('./rsa.js');
 const compute_trust = require('./trust_compute.js');
+
 /*
 Protocol Define:
 Command: Search
@@ -48,6 +51,16 @@ function PeerServer(address, port, seeds) {
     console.log("P2P peer running at " + address + ':' + port);
 }
 
+PeerSever.prototype.updatePeerList = function(){
+    this.searchNeighbor('handle/exchangePeer',function (foreign_peers){
+        for (var e in foreign_peers){
+            if (this.peer_list.length <= MAX_PEERS){
+                this.peer_list.push(e);
+            }
+        }
+    }.bind(this));
+}
+
 PeerServer.prototype.addPeer = function(peer) {
     this.peer_list.push(peer);
 }
@@ -63,6 +76,8 @@ PeerServer.prototype.removePeer = function(peer) {
 
 PeerServer.prototype.maintain = function() {
     console.log('P2P: doing housekeeping');
+    if (this.peer_list.length < MIN_PEERS)
+        this.updatePeerList();
     this.cleanPeer();
     this.store_con.saveRecords();
 }
@@ -84,7 +99,7 @@ PeerServer.prototype.requestDomain = function(request, callback) {
         process.nextTick(function() { callback(request, answer); });
     } else {
         var success = false;
-        this.searchNeighbor(request, { address: this.peer.self.address, port: this.peer.self.port }, REQUEST_TTL);
+        this.searchNeighbor('handle/search', request, { address: this.peer.self.address, port: this.peer.self.port }, REQUEST_TTL);
 
         RespondEvent.on('answer', function(request, answer) {
             callback(request, answer);
@@ -100,14 +115,15 @@ PeerServer.prototype.requestDomain = function(request, callback) {
 }
 
 
-PeerServer.prototype.searchNeighbor = function(request, respondTo, ttl) {
+PeerServer.prototype.searchNeighbor = function(remote_cmd, request, respondTo, ttl, callback) {
     for (var ele_peer in this.peer_list) {
         this.peer.remote(ele_peer).run('handle/search', {
             request: request,
             respondTo: respondTo,
             TTL: ttl
         }, (err, result) => {
-            if (err) { console.log(err); }
+            if (err) console.log(err);
+            if (callback) callback();
         });
     }
 }
@@ -131,7 +147,7 @@ PeerServer.prototype.feedback = function(request, answer, is_good) {
         var incre = 0;
     var peers = this.store_con.getPeer(request,answer);
     for (var p in peers){
-        var p_trust = this.store_con.getTrust(p);
+        var p_trust = this.store_con.getTrustRaw(p);
         var p_trust = compute_trust.increment(p_trust,incre);
         this.store_con.setTrust(p,p_trust);
     }
@@ -145,6 +161,7 @@ PeerServer.prototype.checkIgnore = function(request, from_peer) {
     }
     return false;
 }
+
 
 PeerServer.prototype.setIgnore = function(request, from_peer) {
     if (this.ignore_list[request]) {
@@ -195,7 +212,7 @@ function search(payload, done) {
 
     ttl -= 1;
     if (ttl > 0)
-        this.searchNeighbor(request, respondTo, ttl);
+        this.searchNeighbor('handle/search', request, respondTo, ttl);
     done('search checked');
 }
 

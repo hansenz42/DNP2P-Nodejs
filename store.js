@@ -83,13 +83,20 @@ StoreControl.prototype.getPeer = function(request,answer){
 	return this.cache[request][answer];
 }
 
-StoreControl.prototype.getTrust = function(id) {
+StoreControl.prototype.getTrustRaw = function(id) {
+	//return raw fractions of trust
     assert(typeof(id) == 'string');
     if (id == this.rsa.getPubKey()) {
-        return 99999999;
+        return [99999999,1];
     } else {
         return this.trust_list[id];
     }
+}
+
+StoreControl.prototype.getTrust = function(id){
+	//return the value of trust
+	var fraction = this.getTrustRaw(id);
+	return fraction[0]/fraction[1];
 }
 
 StoreControl.prototype.setTrust = function(id, trust) {
