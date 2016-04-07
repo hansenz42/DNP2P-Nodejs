@@ -12,7 +12,6 @@ const EventEmitter = require('events');
 const _ = require('underscore');
 const ping = require('ping');
 const rsa = require('./rsa.js');
-const compute_trust = require('./trust_compute.js');
 
 /*
 Protocol Define:
@@ -37,7 +36,8 @@ var RespondEvent = new EventEmitter();
 
 function PeerServer(address, port, seeds) {
     assert(Array.isArray(seeds));
-    this.store_con = new store();
+    this.rsa = new rsa();
+    this.store_con = new store(this.rsa);
     this.peer = p2p.peer({ host: address, port: port, wellKnownPeers: seeds });
     this.peer.handle.search = search.bind(this);
     this.peer.handle.exchangePeer = exchangePeer.bind(this);
@@ -45,13 +45,15 @@ function PeerServer(address, port, seeds) {
     this.peer.handle.exchangeTrust = exchangeTrust.bind(this);
     this.peer_list = seeds;
     this.ignore_list = {};
-    this.rsa = new rsa();
+    
 
     setInterval(function() { this.maintain(); }.bind(this), HOUSEKEEP_INTERVAL);
     console.log("P2P peer running at " + address + ':' + port);
 }
 
-PeerSever.prototype.updatePeerList = function(){
+PeerServer.prototype.updatePeerList = function(){
+    if (this.peer_list.length == 0)
+        return;
     this.searchNeighbor('handle/exchangePeer',function (foreign_peers){
         for (var e in foreign_peers){
             if (this.peer_list.length <= MAX_PEERS){
@@ -76,9 +78,9 @@ PeerServer.prototype.removePeer = function(peer) {
 
 PeerServer.prototype.maintain = function() {
     console.log('P2P: doing housekeeping');
+    this.cleanPeer();
     if (this.peer_list.length < MIN_PEERS)
         this.updatePeerList();
-    this.cleanPeer();
     this.store_con.saveRecords();
 }
 
@@ -93,10 +95,10 @@ PeerServer.prototype.cleanPeer = function() {
 }
 
 PeerServer.prototype.requestDomain = function(request, callback) {
-    assert(type(request) == 'string');
+    assert(typeof(request) == 'string');
     var local_answer = this.store_con.findGoodCache(request);
     if (local_answer) {
-        process.nextTick(function() { callback(request, answer); });
+        process.nextTick(function() { callback(request, local_answer); });
     } else {
         var success = false;
         this.searchNeighbor('handle/search', request, { address: this.peer.self.address, port: this.peer.self.port }, REQUEST_TTL);
@@ -123,7 +125,7 @@ PeerServer.prototype.searchNeighbor = function(remote_cmd, request, respondTo, t
             TTL: ttl
         }, (err, result) => {
             if (err) console.log(err);
-            if (callback) callback();
+            if (callback) callback(result);
         });
     }
 }

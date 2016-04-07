@@ -12,7 +12,8 @@ const fs = require('fs');
 const _ = require('underscore');
 const assert = require('assert');
 
-function StoreControl() {
+function StoreControl(rsa) {
+    this.rsa = rsa;
     this.trust_list = this.loadJSON(TRUST_PATH);
     this.cache = this.loadJSON(CACHE_PATH);
     console.log('P2P STORE: import trust list');
@@ -60,6 +61,7 @@ StoreControl.prototype.findGoodCache = function(request) {
     var res = [];
     for (var address in this.cache[request]) {
         var pub_ids = this.cache[request][address];
+        console.log(pub_ids);
         for (var ele_id in pub_ids) {
             var trust = this.getTrust(ele_id);
             if (res.length < GET_CACHE_NUM) {
@@ -93,10 +95,13 @@ StoreControl.prototype.getTrustRaw = function(id) {
     }
 }
 
-StoreControl.prototype.getTrust = function(id){
+StoreControl.prototype.getTrust = function(id){ 
 	//return the value of trust
 	var fraction = this.getTrustRaw(id);
-	return fraction[0]/fraction[1];
+    if (fraction)
+        return fraction[0]/fraction[1];
+    else
+        return 0
 }
 
 StoreControl.prototype.setTrust = function(id, trust) {

@@ -22,7 +22,10 @@ RsaKey.prototype.decryptWithPublicStr = function(encrypted, pub_key_str){
 }
 
 RsaKey.prototype.getPubKey = function(){
-	return this.key.exportKey('pkcs1-public-pem');
+	var key_str =  this.key.exportKey('pkcs1-public-pem');
+	var arr =  key_str.split('\n');
+	var stripped_key_str = arr.slice(1,-1).join('');
+	return stripped_key_str;
 }
 
 function loadKey (){

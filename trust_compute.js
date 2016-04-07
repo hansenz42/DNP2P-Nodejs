@@ -29,5 +29,5 @@ function recommend(local,foreigns){
 	}
 }
 
-exports.local = local;
+exports.increment = increment;
 exports.recommend = recommend;
