@@ -10,22 +10,20 @@ function RsaKey (){
 	this.key = loadKey();
 }
 
-RsaKey.prototype.encryptWithPrivate = function(message){
-	var encrypted = this.key.encrypt(message,ENCRYPTE_ENCODE);
-	return encrypted;
+RsaKey.prototype.sign = function(message){
+	var sign = this.key.sign(message,ENCRYPTE_ENCODE);
+	return sign;
 }
 
-RsaKey.prototype.decryptWithPublicStr = function(encrypted, pub_key_str){
-	var temp_key = new NodeRSA(key_str);
-	var message = temp_key.decrypt(encrypted,ENCRYPTE_ENCODE);
-	return message;
+RsaKey.prototype.verifyExternal = function(mes, sig, pub_key_str){
+	var temp_key = new NodeRSA();
+	temp_key.importKey(pub_key_str);
+	return temp_key.verify(mes,sig,'buffer',ENCRYPTE_ENCODE);
 }
 
 RsaKey.prototype.getPubKey = function(){
 	var key_str =  this.key.exportKey('pkcs1-public-pem');
-	var arr =  key_str.split('\n');
-	var stripped_key_str = arr.slice(1,-1).join('');
-	return stripped_key_str;
+	return key_str;
 }
 
 function loadKey (){

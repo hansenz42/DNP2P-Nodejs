@@ -1,4 +1,4 @@
-const ANSWER_TIMEOUT = 1500;
+const ANSWER_TIMEOUT = 500;
 const HOUSEKEEP_INTERVAL = 30000;
 const REQUEST_TTL = 10;
 const IGNORE_TIMEOUT = 10000;
@@ -45,7 +45,6 @@ function PeerServer(address, port, seeds) {
     this.peer.handle.exchangeTrust = exchangeTrust.bind(this);
     this.peer_list = seeds;
     this.ignore_list = {};
-
 
     setInterval(function() { this.maintain(); }.bind(this), HOUSEKEEP_INTERVAL);
     console.log("P2P peer running at " + address + ':' + port);
@@ -106,6 +105,7 @@ PeerServer.prototype.requestDomain = function(request, callback) {
             respondTo: { host: this.peer.self.host, port: this.peer.self.port },
             TTL: REQUEST_TTL
         }
+
         this.searchNeighbor('handle/search', message, null);
 
         var resolve = function(request, answer_li) {
@@ -116,7 +116,6 @@ PeerServer.prototype.requestDomain = function(request, callback) {
         setTimeout(() => {
             RespondEvent.removeListener('answer', resolve);
             callback(request, remote_answer);
-
         }, ANSWER_TIMEOUT);
     }
 }
@@ -132,9 +131,11 @@ PeerServer.prototype.searchNeighbor = function(remote_cmd, message, callback) {
 }
 
 PeerServer.prototype.replyRequest = function(request, answer, to_peer) {
+    var message = {request:request,answer:answer};
+    var sig = this.rsa.sign(message);
     this.peer.remote(to_peer).run('handle/answer', {
-        request: request,
-        answer: answer,
+        message: message,
+        signature: sig,
         public_key: this.rsa.getPubKey()
     }, (err, result) => {
         if (err) { console.log(err); }
@@ -163,7 +164,6 @@ PeerServer.prototype.checkIgnore = function(request, from_peer) {
     }
     return false;
 }
-
 
 PeerServer.prototype.setIgnore = function(request, from_peer) {
     if (this.ignore_list[request]) {
@@ -232,12 +232,18 @@ function exchangePeer(payload, done) {
 function answer(payload, done) {
     //get answer and public key
     //put answer into cache
-    var request = payload['request'];
-    var answer_li = payload['answer'];
+    var mess = payload['message'];
+    var signature = payload['signature'];
     var pubkey = payload['public_key'];
-    assert(request);
-    assert(answer);
-    assert(pubkey);
+    console.log(signature);
+    console.log(mess);
+    var vaild = this.rsa.verifyExternal(mess,signature,pubkey);
+    if (!vaild){
+        done(null,"You LIAR!!!");
+        return;
+    }
+    var request = mess['request'];
+    var answer_li = mess['answer'];
 
     for (var i in answer_li)
         this.store_con.setCache(request, answer_li[i]['address'], pubkey);
