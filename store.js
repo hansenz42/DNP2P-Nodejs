@@ -61,7 +61,6 @@ StoreControl.prototype.findGoodCache = function(request) {
     var res = [];
     for (var address in this.cache[request]) {
         var pub_ids = this.cache[request][address];
-        console.log(pub_ids);
         for (var ele_id in pub_ids) {
             var trust = this.getTrust(ele_id);
             if (res.length < GET_CACHE_NUM) {

@@ -27,17 +27,19 @@ function resolve(req, res) {
         assert(ret_hostname == hostname);
         assert(Array.isArray(ans));
         if (ans) {
-            for (var e in ans) {
-                res.answer.push({ name: hostname, type: 'A', data: e, 'ttl': ttl });
-                test(question, ans, peer.feedback);
+            for (var i in ans) {
+                res.answer.push({ name: hostname, type: 'A', data: ans[i], 'ttl': ttl });
+                test(ans[i],function(isAilve){peer.feedback(question,ans[i],isAilve)});
             }
         } else {
             dns.lookup(hostname, (err, reply, family) => {
-                if (err) { consonle.log(err);
-                    return; }
+                if (err) { 
+                    consonle.log(err);
+                    return; 
+                }
                 var address = reply['address'] || reply;
                 res.answer.push({ name: hostname, type: 'A', data: address, 'ttl': ttl });
-                test(question, address, peer.store_con.setCache, null);
+                test(address, function(isAilve){peer.store_con.setCache(question,address)});
             });
         }
         res.end();
@@ -45,9 +47,9 @@ function resolve(req, res) {
 
 }
 
-function test(question, address, callback) {
+function test(address,callback) {
     ping.sys.probe(address, function(isAlive) {
-        callback(question,address,isAlive);
+        callback(isAlive);
         }
     });
 }

@@ -45,19 +45,19 @@ function PeerServer(address, port, seeds) {
     this.peer.handle.exchangeTrust = exchangeTrust.bind(this);
     this.peer_list = seeds;
     this.ignore_list = {};
-    
+
 
     setInterval(function() { this.maintain(); }.bind(this), HOUSEKEEP_INTERVAL);
     console.log("P2P peer running at " + address + ':' + port);
 }
 
-PeerServer.prototype.updatePeerList = function(){
+PeerServer.prototype.updatePeerList = function() {
     if (this.peer_list.length == 0)
         return;
-    this.searchNeighbor('handle/exchangePeer',function (foreign_peers){
-        for (var e in foreign_peers){
-            if (this.peer_list.length <= MAX_PEERS){
-                this.peer_list.push(e);
+    this.searchNeighbor('handle/exchangePeer', null, function(foreign_peers) {
+        for (var i in foreign_peers) {
+            if (this.peer_list.length <= MAX_PEERS) {
+                this.peer_list.push(foreign_peers[i]);
             }
         }
     }.bind(this));
@@ -68,9 +68,9 @@ PeerServer.prototype.addPeer = function(peer) {
 }
 
 PeerServer.prototype.removePeer = function(peer) {
-    for (var e in this.peer_list) {
-        if (_isEqual(peer, e)) {
-            delete e;
+    for (var i in this.peer_list) {
+        if (_isEqual(peer, this.peer_list[i])) {
+            delete this.peer_list[i];
         }
     }
     _.compact(this.peer_list);
@@ -86,9 +86,9 @@ PeerServer.prototype.maintain = function() {
 
 PeerServer.prototype.cleanPeer = function() {
     this.peer_list.forEach(function(ele, i) {
-        ping.sys.probe(ele['address'], function(isAlive) {
+        ping.sys.probe(ele['host'], function(isAlive) {
             if (!isAlive) {
-                this.removePeer(ele['address']);
+                this.removePeer(ele['host']);
             }
         }.bind(this))
     });
@@ -97,42 +97,42 @@ PeerServer.prototype.cleanPeer = function() {
 PeerServer.prototype.requestDomain = function(request, callback) {
     assert(typeof(request) == 'string');
     var local_answer = this.store_con.findGoodCache(request);
-    if (local_answer) {
+    if (local_answer.length != 0) {
         process.nextTick(function() { callback(request, local_answer); });
     } else {
-        var success = false;
-        this.searchNeighbor('handle/search', request, { address: this.peer.self.address, port: this.peer.self.port }, REQUEST_TTL);
+        var remote_answer = [];
+        var message = {
+            request: request,
+            respondTo: { host: this.peer.self.host, port: this.peer.self.port },
+            TTL: REQUEST_TTL
+        }
+        this.searchNeighbor('handle/search', message, null);
 
-        RespondEvent.on('answer', function(request, answer) {
-            callback(request, answer);
-            success = true;
-        });
+        var resolve = function(request, answer_li) {
+            remote_answer = remote_answer.concat(answer_li);
+        }
+
+        RespondEvent.on('answer', resolve);
         setTimeout(() => {
             RespondEvent.removeListener('answer', resolve);
-            if (!success) {
-                callback(request, null);
-            }
+            callback(request, remote_answer);
+
         }, ANSWER_TIMEOUT);
     }
 }
 
-
-PeerServer.prototype.searchNeighbor = function(remote_cmd, request, respondTo, ttl, callback) {
-    for (var ele_peer in this.peer_list) {
-        this.peer.remote(ele_peer).run('handle/search', {
-            request: request,
-            respondTo: respondTo,
-            TTL: ttl
-        }, (err, result) => {
+PeerServer.prototype.searchNeighbor = function(remote_cmd, message, callback) {
+    for (var i in this.peer_list) {
+        console.log(this.peer_list[i]);
+        this.peer.remote(this.peer_list[i]).run(remote_cmd, message, (err, result) => {
             if (err) console.log(err);
             if (callback) callback(result);
         });
     }
 }
 
-
 PeerServer.prototype.replyRequest = function(request, answer, to_peer) {
-    this.peer.remote(to_peer).run('handle/getAnswer', {
+    this.peer.remote(to_peer).run('handle/answer', {
         request: request,
         answer: answer,
         public_key: this.rsa.getPubKey()
@@ -147,17 +147,17 @@ PeerServer.prototype.feedback = function(request, answer, is_good) {
         var incre = 1;
     else
         var incre = 0;
-    var peers = this.store_con.getPeer(request,answer);
-    for (var p in peers){
-        var p_trust = this.store_con.getTrustRaw(p);
-        var p_trust = compute_trust.increment(p_trust,incre);
-        this.store_con.setTrust(p,p_trust);
+    var peers = this.store_con.getPeer(request, answer);
+    for (var i in peers) {
+        var p_trust = this.store_con.getTrustRaw(peers[i]);
+        var p_trust = compute_trust.increment(p_trust, incre);
+        this.store_con.setTrust(peers[i], p_trust);
     }
 }
 
 PeerServer.prototype.checkIgnore = function(request, from_peer) {
     if (this.ignore_list[request]) {
-        if (this.ignore_list[request].indexOf(from_peer['address']) != -1) {
+        if (this.ignore_list[request].indexOf(from_peer['host']) != -1) {
             return true;
         }
     }
@@ -167,17 +167,17 @@ PeerServer.prototype.checkIgnore = function(request, from_peer) {
 
 PeerServer.prototype.setIgnore = function(request, from_peer) {
     if (this.ignore_list[request]) {
-        if (this.ignore_list[request].indexOf(from_peer['address']) == -1) {
-            this.ignore_list[request].push(from_peer['address']);
+        if (this.ignore_list[request].indexOf(from_peer['host']) == -1) {
+            this.ignore_list[request].push(from_peer['host']);
         }
     } else {
-        this.ignore_list[request] = [from_peer['address']];
+        this.ignore_list[request] = [from_peer['host']];
     }
 }
 
 PeerServer.prototype.delIgnore = function(request, from_peer) {
     if (this.ignore_list[request]) {
-        this.ignore_list[request] = _.without(this.ignore_list[request], from_peer['address']);
+        this.ignore_list[request] = _.without(this.ignore_list[request], from_peer['host']);
     }
     if (this.ignore_list[request].length == 0) {
         delete this.ignore_list[request];
@@ -199,47 +199,54 @@ function search(payload, done) {
     assert(ttl);
 
     if (this.checkIgnore(request, respondTo)) {
-        done('ignored');
+        done(null,'ignored');
         return;
     } else {
         this.setIgnore(request, respondTo);
         setTimeout(function() {
             this.delIgnore(request, respondTo);
-        }, IGNORE_TIMEOUT);
+        }.bind(this), IGNORE_TIMEOUT);
     }
 
     var answer = this.store_con.findGoodCache(request);
     if (answer.length > 0)
         this.replyRequest(request, answer, respondTo);
 
-    ttl -= 1;
-    if (ttl > 0)
-        this.searchNeighbor('handle/search', request, respondTo, ttl);
-    done('search checked');
+    ttl = ttl - 1;
+    if (ttl > 0) {
+        var message = {
+            request: request,
+            respondTo: { host: this.peer.self.host, port: this.peer.self.port },
+            TTL: REQUEST_TTL
+        }
+        this.searchNeighbor('handle/search', message, null);
+    }
+    done(null,'search checked');
 }
 
 function exchangePeer(payload, done) {
     //return new neighbor to sender
-    done(this.store_con.peer_list);
+    done(null,this.store_con.peer_list);
 }
 
 function answer(payload, done) {
     //get answer and public key
     //put answer into cache
     var request = payload['request'];
-    var answer = payload['answer'];
+    var answer_li = payload['answer'];
     var pubkey = payload['public_key'];
     assert(request);
     assert(answer);
     assert(pubkey);
 
-    this.store_con.setCache(request, answer, pubkey);
-    RespondEvent.emit('answer', request, answer);
-    done('answer got');
+    for (var i in answer_li)
+        this.store_con.setCache(request, answer_li[i]['address'], pubkey);
+    RespondEvent.emit('answer', request, answer_li);
+    done(null,'answer got');
 }
 
 function exchangeTrust(payload, done) {
-    done(this.store_con.trust_list);
+    done(null,this.store_con.trust_list);
 }
 
 module.exports = PeerServer;
