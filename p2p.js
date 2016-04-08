@@ -10,7 +10,6 @@ const p2p = require('p2p');
 const fs = require('fs');
 const EventEmitter = require('events');
 const _ = require('underscore');
-const ping = require('ping');
 const rsa = require('./rsa.js');
 
 /*
@@ -43,6 +42,7 @@ function PeerServer(address, port, seeds) {
     this.peer.handle.exchangePeer = exchangePeer.bind(this);
     this.peer.handle.answer = answer.bind(this);
     this.peer.handle.exchangeTrust = exchangeTrust.bind(this);
+    this.peer.handle.alive = alive.bind(this);
     this.peer_list = seeds;
     this.ignore_list = {};
 
@@ -53,7 +53,7 @@ function PeerServer(address, port, seeds) {
 PeerServer.prototype.updatePeerList = function() {
     if (this.peer_list.length == 0)
         return;
-    this.searchNeighbor('handle/exchangePeer', null, function(foreign_peers) {
+    this.searchNeighbor('handle/exchangePeer', {}, function(foreign_peers) {
         for (var i in foreign_peers) {
             if (this.peer_list.length <= MAX_PEERS) {
                 this.peer_list.push(foreign_peers[i]);
@@ -68,11 +68,10 @@ PeerServer.prototype.addPeer = function(peer) {
 
 PeerServer.prototype.removePeer = function(peer) {
     for (var i in this.peer_list) {
-        if (_isEqual(peer, this.peer_list[i])) {
+        if (_.isEqual(peer, this.peer_list[i])) {
             delete this.peer_list[i];
         }
     }
-    _.compact(this.peer_list);
 }
 
 PeerServer.prototype.maintain = function() {
@@ -85,12 +84,13 @@ PeerServer.prototype.maintain = function() {
 
 PeerServer.prototype.cleanPeer = function() {
     this.peer_list.forEach(function(ele, i) {
-        ping.sys.probe(ele['host'], function(isAlive) {
-            if (!isAlive) {
-                this.removePeer(ele['host']);
+        this.peer.remote(ele).run('handle/alive',{},function(err,result){
+            if (err){
+                this.removePeer(ele);
             }
         }.bind(this))
-    });
+    }.bind(this));
+    _.compact(this.peer_list);
 }
 
 PeerServer.prototype.requestDomain = function(request, callback) {
@@ -106,7 +106,7 @@ PeerServer.prototype.requestDomain = function(request, callback) {
             TTL: REQUEST_TTL
         }
 
-        this.searchNeighbor('handle/search', message, null);
+        this.searchNeighbor('handle/search', message);
 
         var resolve = function(request, answer_li) {
             remote_answer = remote_answer.concat(answer_li);
@@ -122,8 +122,7 @@ PeerServer.prototype.requestDomain = function(request, callback) {
 
 PeerServer.prototype.searchNeighbor = function(remote_cmd, message, callback) {
     for (var i in this.peer_list) {
-        console.log(this.peer_list[i]);
-        this.peer.remote(this.peer_list[i]).run(remote_cmd, message, (err, result) => {
+        this.peer.remote(this.peer_list[i]).run(remote_cmd, message, function(err, result){
             if (err) console.log(err);
             if (callback) callback(result);
         });
@@ -149,6 +148,8 @@ PeerServer.prototype.feedback = function(request, answer, is_good) {
     else
         var incre = 0;
     var peers = this.store_con.getPeer(request, answer);
+    if (!peers)
+        return false;
     for (var i in peers) {
         var p_trust = this.store_con.getTrustRaw(peers[i]);
         var p_trust = compute_trust.increment(p_trust, incre);
@@ -253,6 +254,10 @@ function answer(payload, done) {
 
 function exchangeTrust(payload, done) {
     done(null,this.store_con.trust_list);
+}
+
+function alive(payload,done){
+    done(null,'I am alive');
 }
 
 module.exports = PeerServer;
