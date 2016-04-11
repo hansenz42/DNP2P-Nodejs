@@ -77,12 +77,8 @@ PeerServer.prototype.addPeer = function(peer) {
     this.peer_list.push(peer);
 }
 
-PeerServer.prototype.removePeer = function(peer) {
-    for (var i in this.peer_list) {
-        if (_.isEqual(peer, this.peer_list[i])) {
-            delete this.peer_list[i];
-        }
-    }
+PeerServer.prototype.removePeer = function(ind) {
+    delete this.peer_list[i];
 }
 
 PeerServer.prototype.maintain = function() {
@@ -91,6 +87,7 @@ PeerServer.prototype.maintain = function() {
     if (this.peer_list.length < MIN_PEERS)
         this.updatePeerList();
     this.store_con.saveRecords();
+    this.getReputation();
 }
 
 
@@ -99,7 +96,7 @@ PeerServer.prototype.cleanPeer = function() {
     this.peer_list.forEach(function(ele, i) {
         this.peer.remote(ele).run('handle/alive',{},function(err,result){
             if (err){
-                this.removePeer(ele);
+                this.removePeer(i);
             }
         }.bind(this))
     }.bind(this));
@@ -136,9 +133,11 @@ PeerServer.prototype.requestDomain = function(request, callback) {
 PeerServer.prototype.searchNeighbor = function(remote_cmd, message, callback) {
     for (var i in this.peer_list) {
         this.peer.remote(this.peer_list[i]).run(remote_cmd, message, function(err, result){
-            if (err) console.log(err);
+            if (err) {
+                this.removePeer(i);
+            }
             if (callback) callback(result);
-        });
+        }.bind(this));
     }
 }
 
