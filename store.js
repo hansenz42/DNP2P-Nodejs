@@ -14,10 +14,10 @@ const assert = require('assert');
 
 function StoreControl(rsa) {
     this.rsa = rsa;
-    this.trust_list = this.loadJSON(TRUST_PATH);
+    this.trust = this.loadJSON(TRUST_PATH);
     this.cache = this.loadJSON(CACHE_PATH);
     console.log('P2P STORE: import trust list');
-    console.log(this.trust_list);
+    console.log(this.trust);
     console.log('P2P STORE: import cache');
     console.log(this.cache);
 }
@@ -33,7 +33,7 @@ StoreControl.prototype.loadJSON = function(path) {
 }
 
 StoreControl.prototype.saveRecords = function() {
-    this.saveJSON(TRUST_PATH, this.trust_list);
+    this.saveJSON(TRUST_PATH, this.trust);
     this.saveJSON(CACHE_PATH, this.cache);
 }
 
@@ -90,7 +90,7 @@ StoreControl.prototype.getTrustRaw = function(id) {
     if (id == this.rsa.getPubKey()) {
         return [99999999,1];
     } else {
-        return this.trust_list[id];
+        return this.trust[id];
     }
 }
 
@@ -105,7 +105,7 @@ StoreControl.prototype.getTrust = function(id){
 
 StoreControl.prototype.setTrust = function(id, trust) {
     assert(typeof(id) == 'string');
-    this.trust_list[id] = trust;
+    this.trust[id] = trust;
 }
 
 module.exports = StoreControl;

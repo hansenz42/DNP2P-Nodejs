@@ -2,6 +2,7 @@ const ANSWER_TIMEOUT = 500;
 const HOUSEKEEP_INTERVAL = 30000;
 const REQUEST_TTL = 10;
 const IGNORE_TIMEOUT = 10000;
+const WAIT_TIMEOUT = 2000;
 const MIN_PEERS = 4;
 const MAX_PEERS = 10;
 const WELL_KNOWN_PEERS_PATH = "store/wellknownpeers.json";
@@ -62,6 +63,16 @@ PeerServer.prototype.updatePeerList = function() {
     }.bind(this));
 }
 
+PeerServer.prototype.getReputation = function(){
+    if (this.peer_list.length == 0)
+        return;
+    var foreigns = [];
+    this.searchNeighbor('handle/exchangeTrust', {}, function(foreign_trust){
+        foreigns.push(foreign_trust);
+    }.bind(this));
+    setTimeout(function(){var this.store_con.trust = compute_trust.recommend(this.store_con.trust,foreigns)}.bind(this),WAIT_TIMEOUT);
+}
+
 PeerServer.prototype.addPeer = function(peer) {
     this.peer_list.push(peer);
 }
@@ -75,12 +86,14 @@ PeerServer.prototype.removePeer = function(peer) {
 }
 
 PeerServer.prototype.maintain = function() {
-    console.log('P2P: doing housekeeping');
+    console.log('P2P: refreshing everything');
     this.cleanPeer();
     if (this.peer_list.length < MIN_PEERS)
         this.updatePeerList();
     this.store_con.saveRecords();
 }
+
+
 
 PeerServer.prototype.cleanPeer = function() {
     this.peer_list.forEach(function(ele, i) {
@@ -253,7 +266,7 @@ function answer(payload, done) {
 }
 
 function exchangeTrust(payload, done) {
-    done(null,this.store_con.trust_list);
+    done(null,this.store_con.trust);
 }
 
 function alive(payload,done){

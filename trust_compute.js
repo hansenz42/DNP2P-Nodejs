@@ -20,13 +20,41 @@ function calculatepair(local_list,foreign_lists){
 		sum = (c[0]+c[1])*(c[0]+c[1]) + sum;
 	}
 	sum = sum / num_common;
-	var sim = Math.sqrt(sum);
+	var sim = 1-Math.sqrt(sum);
+	return sim;
 }
 
 function recommend(local,foreigns){
-	for (var one in foreigns){
-		var fraction = calculatepair(local,one);
+	var sims = [];
+	for (var i in foreigns){
+		sims.push(calculatepair(local,foreigns[i]));
 	}
+	var rec_trust = {};
+	for (var table_i in foreigns){
+		var sim = sims[table_i];
+		for (var ele_i in foreigns[table_i]){
+			var peer_trust = foreigns[table_i][ele_i];
+			var to_add = rec_trust[ele_i];
+			if (to_add){
+				rec_trust[ele_i][0] = to_add[0]+sim*peer_trust;
+				rec_trust[ele_i][1] = to_add[1]+sim;
+			} else {
+				rec_trust[ele_i] = [sim*peer_trust,sim];
+			}
+		}
+	}
+	return combine(local,rec_trust);
+}
+
+function combine(local,recommend){
+	for(var ele_i in recommend){
+		if(local[ele_i]){
+			local[ele_i] = (1-ALPHA)*local[ele_i] + ALPHA*recommend[ele_i];
+		} else {
+			local[ele_i] = ALPHA*recommend[ele_i];
+		}
+	}
+	return local;
 }
 
 exports.increment = increment;
