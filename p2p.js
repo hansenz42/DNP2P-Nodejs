@@ -1,5 +1,5 @@
 const ANSWER_TIMEOUT = 500;
-const HOUSEKEEP_INTERVAL = 30000;
+const HOUSEKEEP_INTERVAL = 5000;
 const REQUEST_TTL = 10;
 const IGNORE_TIMEOUT = 10000;
 const WAIT_TIMEOUT = 2000;
@@ -48,7 +48,7 @@ function PeerServer(address, port, seeds) {
     this.ignore_list = {};
 
     setInterval(function() { this.maintain(); }.bind(this), HOUSEKEEP_INTERVAL);
-    console.log("P2P peer running at " + address + ':' + port);
+    console.log("[P2P] P2P peer running at " + address + ':' + port);
 }
 
 PeerServer.prototype.updatePeerList = function() {
@@ -70,20 +70,29 @@ PeerServer.prototype.getReputation = function(){
     this.searchNeighbor('handle/exchangeTrust', {}, function(foreign_trust){
         foreigns.push(foreign_trust);
     }.bind(this));
-    setTimeout(function(){var this.store_con.trust = compute_trust.recommend(this.store_con.trust,foreigns)}.bind(this),WAIT_TIMEOUT);
+    setTimeout(function(){this.store_con.trust = compute_trust.recommend(this.store_con.trust,foreigns)}.bind(this),WAIT_TIMEOUT);
 }
 
 PeerServer.prototype.addPeer = function(peer) {
+    for (var ind in this.peer_list){
+            if (this.peer_list[ind]['host'] == peer['host'] && this.peer_list[ind]['port'] == peer['port'])
+                return;
+    }
     this.peer_list.push(peer);
 }
 
 PeerServer.prototype.removePeer = function(ind) {
-    delete this.peer_list[i];
+    delete this.peer_list[ind];
 }
 
 PeerServer.prototype.maintain = function() {
-    console.log('P2P: refreshing everything');
+    console.log('[P2P] housekeeping');
     this.cleanPeer();
+    console.log('[P2P] alive connected peers '+this.peer_list.length);
+    if (this.peer_list.length == 0)
+        console.log('[P2P] WARNING this peer is lonely forever, you need to start over with new seed peers');
+    else
+        console.log(this.peer_list);
     if (this.peer_list.length < MIN_PEERS)
         this.updatePeerList();
     this.store_con.saveRecords();
@@ -94,13 +103,13 @@ PeerServer.prototype.maintain = function() {
 
 PeerServer.prototype.cleanPeer = function() {
     this.peer_list.forEach(function(ele, i) {
-        this.peer.remote(ele).run('handle/alive',{},function(err,result){
+        this.peer.remote(ele).run('handle/alive',{host:this.peer.self.host,port:this.peer.self.port},function(err,result){
             if (err){
                 this.removePeer(i);
             }
         }.bind(this))
     }.bind(this));
-    _.compact(this.peer_list);
+    this.peer_list = _.compact(this.peer_list);
 }
 
 PeerServer.prototype.requestDomain = function(request, callback) {
@@ -132,6 +141,8 @@ PeerServer.prototype.requestDomain = function(request, callback) {
 
 PeerServer.prototype.searchNeighbor = function(remote_cmd, message, callback) {
     for (var i in this.peer_list) {
+        if (!i)
+            continue;
         this.peer.remote(this.peer_list[i]).run(remote_cmd, message, function(err, result){
             if (err) {
                 this.removePeer(i);
@@ -248,8 +259,6 @@ function answer(payload, done) {
     var mess = payload['message'];
     var signature = payload['signature'];
     var pubkey = payload['public_key'];
-    console.log(signature);
-    console.log(mess);
     var vaild = this.rsa.verifyExternal(mess,signature,pubkey);
     if (!vaild){
         done(null,"You LIAR!!!");
@@ -269,6 +278,7 @@ function exchangeTrust(payload, done) {
 }
 
 function alive(payload,done){
+    this.addPeer(payload);
     done(null,'I am alive');
 }
 

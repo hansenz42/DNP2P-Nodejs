@@ -16,9 +16,9 @@ function StoreControl(rsa) {
     this.rsa = rsa;
     this.trust = this.loadJSON(TRUST_PATH);
     this.cache = this.loadJSON(CACHE_PATH);
-    console.log('P2P STORE: import trust list');
+    console.log('[P2P STORE] import trust list');
     console.log(this.trust);
-    console.log('P2P STORE: import cache');
+    console.log('[P2P STORE] import cache');
     console.log(this.cache);
 }
 

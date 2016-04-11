@@ -9,7 +9,7 @@ function increment(local_trust,incre){
 	return [numer*DECAY+incre,denom*DECAY+1];
 }
 
-function calculatepair(local_list,foreign_lists){
+function calculatepair(local_list,foreign_list){
 	var local_keys = _.keys(local_list);
 	var foreign_keys = _.keys(foreign_list);
 	var common_keys = _.intersection(local_keys,foreign_keys);

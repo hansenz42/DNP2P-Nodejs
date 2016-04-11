@@ -27,14 +27,14 @@ RsaKey.prototype.getPubKey = function(){
 }
 
 function loadKey (){
-	console.log('RSA: Loading Keys');
+	console.log('[RSA] Loading Keys');
 	try{
 		var pri_key_str = fs.readFileSync(PRIVATE_KEY_PATH);
 		var key = new NodeRSA(pri_key_str);
 		var pub_key_str = fs.readFileSync(PUBLIC_KEY_PATH);
 		key.importKey(pub_key_str,'pkcs1-public');
 	}catch (err){
-		console.log('RSA: Loading keys failed. Using new identity.')
+		console.log('[RSA] Loading keys failed. Using new identity.')
 		var key = generateKeyPair();
 	}
 	return key;
