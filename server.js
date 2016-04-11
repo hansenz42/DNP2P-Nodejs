@@ -30,16 +30,16 @@ function resolve(req, res) {
     Event.on('finish',function(){res.end();});
 
     peer.requestDomain(hostname, function(ret_hostname, ans) {
-        console.log("question resolved");
-        console.log(ret_hostname,ans);
         assert(ret_hostname == hostname);
         assert(Array.isArray(ans));
+        console.log("question resolved");
+        console.log(ret_hostname,ans);
         if (ans.length > 0) {
             for (var i in ans) {
-                res.answer.push({ name: hostname, type: 'A', data: ans[i], 'ttl': ttl });
-                Event.emit('finish');
-                test(ans[i],function(isAilve){peer.feedback(hostname,ans[i],isAilve)});
+                res.answer.push({ name: hostname, type: 'A', data: ans[i]['answer'], 'ttl': ttl });     
+                test(ans[i],function(isAilve){peer.feedback(hostname,ans[i]['answer'],isAilve)});
             }
+            Event.emit('finish');
         } else {
             dns.lookup(hostname, (err, reply, family) => {
                 if (err) { 
@@ -50,7 +50,7 @@ function resolve(req, res) {
                 console.log('legacy dns: '+address);
                 res.answer.push({ name: hostname, type: 'A', data: address, 'ttl': ttl });
                 Event.emit('finish');
-                test(address, function(isAilve){peer.store_con.setCache(hostname,address)});
+                test(address, function(isAilve){if(isAlive) peer.store_con.setCache(hostname,address);});
             });
         }
     });

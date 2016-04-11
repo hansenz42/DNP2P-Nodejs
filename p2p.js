@@ -1,18 +1,3 @@
-const ANSWER_TIMEOUT = 500;
-const HOUSEKEEP_INTERVAL = 5000;
-const REQUEST_TTL = 10;
-const IGNORE_TIMEOUT = 10000;
-const WAIT_TIMEOUT = 2000;
-const MIN_PEERS = 4;
-const MAX_PEERS = 10;
-const WELL_KNOWN_PEERS_PATH = "store/wellknownpeers.json";
-
-const p2p = require('p2p');
-const fs = require('fs');
-const EventEmitter = require('events');
-const _ = require('underscore');
-const rsa = require('./rsa.js');
-
 /*
 Protocol Define:
 Command: Search
@@ -28,6 +13,24 @@ Command: exchangeTrust
 Return: Trust list
 */
 
+// Timeout Settings
+const ANSWER_TIMEOUT = 500;
+const IGNORE_TIMEOUT = 10000;
+const WAIT_TIMEOUT = 2000;
+
+// Other Settings
+const HOUSEKEEP_INTERVAL = 5000;
+const REQUEST_TTL = 10;
+const MIN_PEERS = 4;
+const MAX_PEERS = 10;
+const WELL_KNOWN_PEERS_PATH = "store/wellknownpeers.json";
+const SHRINK_CACHE_NUM = 3;
+
+const p2p = require('p2p');
+const fs = require('fs');
+const EventEmitter = require('events');
+const _ = require('underscore');
+const rsa = require('./rsa.js');
 const store = require('./store.js');
 const compute_trust = require('./trust_compute.js');
 const assert = require('assert');
@@ -63,20 +66,22 @@ PeerServer.prototype.updatePeerList = function() {
     }.bind(this));
 }
 
-PeerServer.prototype.getReputation = function(){
+PeerServer.prototype.getReputation = function() {
     if (this.peer_list.length == 0)
         return;
     var foreigns = [];
-    this.searchNeighbor('handle/exchangeTrust', {}, function(foreign_trust){
+    this.searchNeighbor('handle/exchangeTrust', {}, function(foreign_trust) {
         foreigns.push(foreign_trust);
     }.bind(this));
-    setTimeout(function(){this.store_con.trust = compute_trust.recommend(this.store_con.trust,foreigns)}.bind(this),WAIT_TIMEOUT);
+    setTimeout(function() {
+        this.store_con.generateRecommend(foreigns);
+    }.bind(this), WAIT_TIMEOUT);
 }
 
 PeerServer.prototype.addPeer = function(peer) {
-    for (var ind in this.peer_list){
-            if (this.peer_list[ind]['host'] == peer['host'] && this.peer_list[ind]['port'] == peer['port'])
-                return;
+    for (var ind in this.peer_list) {
+        if (this.peer_list[ind]['host'] == peer['host'] && this.peer_list[ind]['port'] == peer['port'])
+            return;
     }
     this.peer_list.push(peer);
 }
@@ -88,7 +93,7 @@ PeerServer.prototype.removePeer = function(ind) {
 PeerServer.prototype.maintain = function() {
     console.log('[P2P] housekeeping');
     this.cleanPeer();
-    console.log('[P2P] alive connected peers '+this.peer_list.length);
+    console.log('[P2P] alive connected peers ' + this.peer_list.length);
     if (this.peer_list.length == 0)
         console.log('[P2P] WARNING this peer is lonely forever, you need to start over with new seed peers');
     else
@@ -99,12 +104,10 @@ PeerServer.prototype.maintain = function() {
     this.getReputation();
 }
 
-
-
 PeerServer.prototype.cleanPeer = function() {
     this.peer_list.forEach(function(ele, i) {
-        this.peer.remote(ele).run('handle/alive',{host:this.peer.self.host,port:this.peer.self.port},function(err,result){
-            if (err){
+        this.peer.remote(ele).run('handle/alive', { host: this.peer.self.host, port: this.peer.self.port }, function(err, result) {
+            if (err) {
                 this.removePeer(i);
             }
         }.bind(this))
@@ -115,35 +118,55 @@ PeerServer.prototype.cleanPeer = function() {
 PeerServer.prototype.requestDomain = function(request, callback) {
     assert(typeof(request) == 'string');
     var local_answer = this.store_con.findGoodCache(request);
-    if (local_answer.length != 0) {
-        process.nextTick(function() { callback(request, local_answer); });
-    } else {
-        var remote_answer = [];
-        var message = {
-            request: request,
-            respondTo: { host: this.peer.self.host, port: this.peer.self.port },
-            TTL: REQUEST_TTL
-        }
-
-        this.searchNeighbor('handle/search', message);
-
-        var resolve = function(request, answer_li) {
-            remote_answer = remote_answer.concat(answer_li);
-        }
-
-        RespondEvent.on('answer', resolve);
-        setTimeout(() => {
-            RespondEvent.removeListener('answer', resolve);
-            callback(request, remote_answer);
-        }, ANSWER_TIMEOUT);
+    var remote_answer = [];
+    var message = {
+        request: request,
+        respondTo: { host: this.peer.self.host, port: this.peer.self.port },
+        TTL: REQUEST_TTL
     }
+
+    this.searchNeighbor('handle/search', message);
+
+    var resolveAnswer = function(request, answer_li, from_peer) {
+        var trust = this.store_con.getTrust(from_peer);
+        for (var ind in answer_li) {
+            remote_answer.push({ answer: answer_li[ind]['answer'], trust: trust });
+        }
+    }.bind(this);
+
+    RespondEvent.on('answer', resolveAnswer);
+    setTimeout(() => {
+        RespondEvent.removeListener('answer', resolveAnswer);
+        var answers = local_answer.concat(remote_answer);
+        callback(request, shrinkAnswer(answers));
+    }, ANSWER_TIMEOUT);
+
+}
+
+function shrinkAnswer(answers) {
+    var temp = _.sortBy(answers, 'trust');
+    temp = temp.slice(0, SHRINK_CACHE_NUM);
+    var ret = temp.slice(); //copy
+    for (var i in temp) {
+        for (var j = Number(i)+1; j < temp.length; j++) {
+            if(j>=temp.length)
+                continue;
+            if (temp[i]['answer'] == temp[j]['answer']) {
+                if (temp[i]['trust'] > temp[j]['trust'])
+                    delete ret[j];
+                else
+                    delete ret[i];
+            }
+        }
+    }
+    return _.compact(ret);
 }
 
 PeerServer.prototype.searchNeighbor = function(remote_cmd, message, callback) {
     for (var i in this.peer_list) {
         if (!i)
             continue;
-        this.peer.remote(this.peer_list[i]).run(remote_cmd, message, function(err, result){
+        this.peer.remote(this.peer_list[i]).run(remote_cmd, message, function(err, result) {
             if (err) {
                 this.removePeer(i);
             }
@@ -153,7 +176,7 @@ PeerServer.prototype.searchNeighbor = function(remote_cmd, message, callback) {
 }
 
 PeerServer.prototype.replyRequest = function(request, answer, to_peer) {
-    var message = {request:request,answer:answer};
+    var message = { request: request, answer: answer };
     var sig = this.rsa.sign(message);
     this.peer.remote(to_peer).run('handle/answer', {
         message: message,
@@ -165,6 +188,8 @@ PeerServer.prototype.replyRequest = function(request, answer, to_peer) {
 }
 
 PeerServer.prototype.feedback = function(request, answer, is_good) {
+    assert(typeof(request) == 'string');
+    assert(typeof(answer) == 'string');
     //get feedback from server and set trust values.
     if (is_good)
         var incre = 1;
@@ -174,9 +199,7 @@ PeerServer.prototype.feedback = function(request, answer, is_good) {
     if (!peers)
         return false;
     for (var i in peers) {
-        var p_trust = this.store_con.getTrustRaw(peers[i]);
-        var p_trust = compute_trust.increment(p_trust, incre);
-        this.store_con.setTrust(peers[i], p_trust);
+        this.store_con.updateTrustLocal(peers[i],incre);
     }
 }
 
@@ -223,7 +246,7 @@ function search(payload, done) {
     assert(ttl);
 
     if (this.checkIgnore(request, respondTo)) {
-        done(null,'ignored');
+        done(null, 'ignored');
         return;
     } else {
         this.setIgnore(request, respondTo);
@@ -245,12 +268,12 @@ function search(payload, done) {
         }
         this.searchNeighbor('handle/search', message, null);
     }
-    done(null,'search checked');
+    done(null, 'search checked');
 }
 
 function exchangePeer(payload, done) {
     //return new neighbor to sender
-    done(null,this.store_con.peer_list);
+    done(null, this.store_con.peer_list);
 }
 
 function answer(payload, done) {
@@ -259,27 +282,26 @@ function answer(payload, done) {
     var mess = payload['message'];
     var signature = payload['signature'];
     var pubkey = payload['public_key'];
-    var vaild = this.rsa.verifyExternal(mess,signature,pubkey);
-    if (!vaild){
-        done(null,"You LIAR!!!");
+    var vaild = this.rsa.verifyExternal(mess, signature, pubkey);
+    if (!vaild) {
+        done(null, "You LIAR!!!");
         return;
     }
     var request = mess['request'];
     var answer_li = mess['answer'];
-
     for (var i in answer_li)
-        this.store_con.setCache(request, answer_li[i]['address'], pubkey);
-    RespondEvent.emit('answer', request, answer_li);
-    done(null,'answer got');
+        this.store_con.setCache(request, answer_li[i]['answer'], pubkey);
+    RespondEvent.emit('answer', request, answer_li, pubkey);
+    done(null, 'answer got');
 }
 
 function exchangeTrust(payload, done) {
-    done(null,this.store_con.trust);
+    done(null, this.store_con.local_trust);
 }
 
-function alive(payload,done){
+function alive(payload, done) {
     this.addPeer(payload);
-    done(null,'I am alive');
+    done(null, 'I am alive');
 }
 
 module.exports = PeerServer;
