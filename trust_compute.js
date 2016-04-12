@@ -15,14 +15,20 @@ function increment(local_trust, incre) {
 }
 
 function calculatepair(local_list, foreign_list) {
+    // console.log('local_list',local_list);
+    // console.log('foreign_list',foreign_list);
     var local_keys = _.keys(local_list);
     var foreign_keys = _.keys(foreign_list);
     var common_keys = _.intersection(local_keys, foreign_keys);
+    // console.log('common_keys',common_keys);
     var num_common = common_keys.length;
-    var common_pairs = _.zip(_.pick(local_list, common_keys), _.pick(foreign_list, common_keys));
+    var common_pairs = _.zip(_.values(_.pick(local_list, common_keys)), _.values(_.pick(foreign_list, common_keys)));
+    // console.log('common_pairs',common_pairs);
     var sum = 0;
-    for (var c in common_pairs) {
-        sum = (c[0] + c[1]) * (c[0] + c[1]) + sum;
+    for (var i in common_pairs) {
+        var c = common_pairs[i];
+        sum = ((c[0][0] / c[0][1])-(c[1][0]/c[1][1])) * ((c[0][0] / c[0][1])-(c[1][0]/c[1][1])) + sum;
+        // console.log('sum',sum);
     }
     sum = sum / num_common;
     var sim = 1 - Math.sqrt(sum);
@@ -30,24 +36,22 @@ function calculatepair(local_list, foreign_list) {
 }
 
 function recommend(local, foreigns) {
-    console.log("local trust:");
-    console.log(local);
-    console.log("foreign trusts:");
-    console.log(foreigns);
+    // console.log("local trust:");
+    // console.log(local);
+    // console.log("foreign trusts:");
+    // console.log(foreigns);
     var sims = [];
     for (var i in foreigns) {
         sims.push(calculatepair(local, foreigns[i]));
     }
-    console.log("sims");
-    console.log(sims);
+    // console.log("sims");
+    // console.log(sims);
     var rec_trust = {};
     for (var table_i in foreigns) {
         var sim = sims[table_i];
         for (var ele_i in foreigns[table_i]) {
             var peer_trust = foreigns[table_i][ele_i];
-            console.log("peer_trust",peer_trust);
             var to_add = rec_trust[ele_i];
-            console.log("to_add",to_add);
             if (to_add) {
                 rec_trust[ele_i][0] = to_add[0] + sim * peer_trust[0]/peer_trust[1];
                 rec_trust[ele_i][1] = to_add[1] + sim;
@@ -57,7 +61,7 @@ function recommend(local, foreigns) {
         }
 
     }
-    console.log("recommend",rec_trust);
+    // console.log("recommend",rec_trust);
     return rec_trust;
 }
 

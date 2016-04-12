@@ -11,18 +11,24 @@ const GET_CACHE_NUM = 3;
 const fs = require('fs');
 const _ = require('underscore');
 const assert = require('assert');
-const compute = require('trust_compute.js');
+const compute = require('./trust_compute.js');
 
 function StoreControl(rsa) {
     this.rsa = rsa;
     this.local_trust = this.loadJSON(TRUST_PATH);
     this.recommend = {};
     this.cache = this.loadJSON(CACHE_PATH);
-    console.log('[P2P STORE] import trust list');
-    console.log('[P2P STORE] import cache');
+    console.log('[P2P STORE] import trust list',this.local_trust);
+    console.log('[P2P STORE] import cache',this.cache);
 }
 
 StoreControl.prototype.generateRecommend = function(foreigns){
+    console.log("foreigns:",foreigns);
+    for (var i in foreigns){
+        if (_.isEmpty(foreigns[i]))
+            delete foreigns[i]
+    }
+    _.compact(foreigns);
     this.recommend = compute.recommend(this.local_trust,foreigns);
 }
 
@@ -56,7 +62,8 @@ StoreControl.prototype.setCache = function(request, answer, from) {
     }
     if (this.cache[request]) {
         if (this.cache[request][answer]) {
-            this.cache[request][answer].push(from);
+            if (this.cache[request][answer].indexOf(from)==-1)
+                this.cache[request][answer].push(from);
         } else {
             this.cache[request][answer] = [from];
         }

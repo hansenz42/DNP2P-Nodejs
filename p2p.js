@@ -41,7 +41,7 @@ function PeerServer(address, port, seeds) {
     assert(Array.isArray(seeds));
     this.rsa = new rsa();
     this.store_con = new store(this.rsa);
-    this.peer = p2p.peer({ host: address, port: port, wellKnownPeers: seeds });
+    this.peer = p2p.peer({ host: address, port: port});
     this.peer.handle.search = search.bind(this);
     this.peer.handle.exchangePeer = exchangePeer.bind(this);
     this.peer.handle.answer = answer.bind(this);
@@ -117,7 +117,9 @@ PeerServer.prototype.cleanPeer = function() {
 
 PeerServer.prototype.requestDomain = function(request, callback) {
     assert(typeof(request) == 'string');
+    console.log("searching for "+request);
     var local_answer = this.store_con.findGoodCache(request);
+    console.log("local answer: ",local_answer);
     var remote_answer = [];
     var message = {
         request: request,
@@ -137,6 +139,7 @@ PeerServer.prototype.requestDomain = function(request, callback) {
     RespondEvent.on('answer', resolveAnswer);
     setTimeout(() => {
         RespondEvent.removeListener('answer', resolveAnswer);
+        console.log("remote answer: ",remote_answer);
         var answers = local_answer.concat(remote_answer);
         callback(request, shrinkAnswer(answers));
     }, ANSWER_TIMEOUT);
@@ -244,6 +247,7 @@ function search(payload, done) {
     assert(request);
     assert(respondTo);
     assert(ttl);
+    console.log("got request:",request, respondTo);
 
     if (this.checkIgnore(request, respondTo)) {
         done(null, 'ignored');
@@ -263,7 +267,7 @@ function search(payload, done) {
     if (ttl > 0) {
         var message = {
             request: request,
-            respondTo: { host: this.peer.self.host, port: this.peer.self.port },
+            respondTo: respondTo,
             TTL: REQUEST_TTL
         }
         this.searchNeighbor('handle/search', message, null);
@@ -283,6 +287,7 @@ function answer(payload, done) {
     var signature = payload['signature'];
     var pubkey = payload['public_key'];
     var vaild = this.rsa.verifyExternal(mess, signature, pubkey);
+    console.log("got answer: ",mess);
     if (!vaild) {
         done(null, "You LIAR!!!");
         return;
