@@ -34,6 +34,7 @@ const rsa = require('./rsa.js');
 const store = require('./store.js');
 const compute_trust = require('./trust_compute.js');
 const assert = require('assert');
+const ping = require('ping');
 
 var RespondEvent = new EventEmitter();
 
@@ -41,7 +42,7 @@ function PeerServer(address, port, seeds) {
     assert(Array.isArray(seeds));
     this.rsa = new rsa();
     this.store_con = new store(this.rsa);
-    this.peer = p2p.peer({ host: address, port: port});
+    this.peer = p2p.peer({ host: address, port: port });
     this.peer.handle.search = search.bind(this);
     this.peer.handle.exchangePeer = exchangePeer.bind(this);
     this.peer.handle.answer = answer.bind(this);
@@ -52,6 +53,12 @@ function PeerServer(address, port, seeds) {
 
     setInterval(function() { this.maintain(); }.bind(this), HOUSEKEEP_INTERVAL);
     console.log("[P2P] P2P peer running at " + address + ':' + port);
+}
+
+PeerServer.prototype.test = function(addr, callback) {
+    ping.sys.probe(addr, function(isAlive) {
+        callback(addr, isAlive);
+    });
 }
 
 PeerServer.prototype.updatePeerList = function() {
@@ -79,7 +86,7 @@ PeerServer.prototype.getReputation = function() {
 }
 
 PeerServer.prototype.addPeer = function(peer) {
-    if (peer['host']=="localhost" || peer['host'] == '127.0.0.1'){
+    if (peer['host'] == "localhost" || peer['host'] == '127.0.0.1') {
         peer['host'] = this.peer.self.host;
     }
     for (var ind in this.peer_list) {
@@ -120,9 +127,9 @@ PeerServer.prototype.cleanPeer = function() {
 
 PeerServer.prototype.requestDomain = function(request, callback) {
     assert(typeof(request) == 'string');
-    console.log("[P2P] searching for "+request);
+    console.log("[P2P] searching for " + request);
     var local_answer = this.store_con.findGoodCache(request);
-    console.log("[P2P] local answer: ",local_answer);
+    console.log("[P2P] local answer: ", local_answer);
     var remote_answer = [];
     var message = {
         request: request,
@@ -142,7 +149,7 @@ PeerServer.prototype.requestDomain = function(request, callback) {
     RespondEvent.on('answer', resolveAnswer);
     setTimeout(() => {
         RespondEvent.removeListener('answer', resolveAnswer);
-        console.log("[P2P] remote answer: ",remote_answer);
+        console.log("[P2P] remote answer: ", remote_answer);
         var answers = local_answer.concat(remote_answer);
         callback(request, shrinkAnswer(answers));
     }, ANSWER_TIMEOUT);
@@ -154,8 +161,8 @@ function shrinkAnswer(answers) {
     temp = temp.slice(0, SHRINK_CACHE_NUM);
     var ret = temp.slice(); //copy
     for (var i in temp) {
-        for (var j = Number(i)+1; j < temp.length; j++) {
-            if(j>=temp.length)
+        for (var j = Number(i) + 1; j < temp.length; j++) {
+            if (j >= temp.length)
                 continue;
             if (temp[i]['answer'] == temp[j]['answer']) {
                 if (temp[i]['trust'] > temp[j]['trust'])
@@ -182,7 +189,7 @@ PeerServer.prototype.searchNeighbor = function(remote_cmd, message, callback) {
 }
 
 PeerServer.prototype.replyRequest = function(request, answer, to_peer) {
-    if (_isEqual(to_peer,{host:this.peer.self.host,port:this.peer.self.port}))
+    if (_isEqual(to_peer, { host: this.peer.self.host, port: this.peer.self.port }))
         return;
     var message = { request: request, answer: answer };
     var sig = this.rsa.sign(message);
@@ -198,17 +205,19 @@ PeerServer.prototype.replyRequest = function(request, answer, to_peer) {
 PeerServer.prototype.feedback = function(request, answer, is_good) {
     assert(typeof(request) == 'string');
     assert(typeof(answer) == 'string');
-    console.log('[P2P] feedback:', request, answer, 'good?',is_good);
+    console.log('[P2P] feedback:', request, answer, 'good?', is_good);
     //get feedback from server and set trust values.
     if (is_good)
         var incre = 1;
-    else
+    else {
         var incre = 0;
+        this.store_con.delCache(request, answer);
+    }
     var peers = this.store_con.getPeer(request, answer);
     if (!peers)
         return false;
     for (var i in peers) {
-        this.store_con.updateTrustLocal(peers[i],incre);
+        this.store_con.updateTrustLocal(peers[i], incre);
     }
 }
 
@@ -253,7 +262,7 @@ function search(payload, done) {
     assert(request);
     assert(respondTo);
     assert(ttl);
-    console.log("[P2P] got request:",request, respondTo);
+    console.log("[P2P] got request:", request, respondTo);
 
     if (this.checkIgnore(request, respondTo)) {
         done(null, 'ignored');
@@ -293,7 +302,7 @@ function answer(payload, done) {
     var signature = payload['signature'];
     var pubkey = payload['public_key'];
     var vaild = this.rsa.verifyExternal(mess, signature, pubkey);
-    console.log("[P2P] got answer: ",mess);
+    console.log("[P2P] got answer: ", mess);
     if (!vaild) {
         done(null, "You LIAR!!!");
         return;
@@ -301,7 +310,9 @@ function answer(payload, done) {
     var request = mess['request'];
     var answer_li = mess['answer'];
     for (var i in answer_li)
-        this.store_con.setCache(request, answer_li[i]['answer'], pubkey);
+        this.test(answer_li[i]['answer'],function(addr, isAlive){
+            this.store_con.setCache(request, addr, pubkey);
+        })
     RespondEvent.emit('answer', request, answer_li, pubkey);
     done(null, 'answer got');
 }

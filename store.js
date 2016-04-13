@@ -52,6 +52,13 @@ StoreControl.prototype.saveRecords = function() {
     this.saveJSON(CACHE_PATH, this.cache);
 }
 
+StoreControl.prototype.delCache = function(request, answer){
+    assert(typeof(request) == 'string');
+    assert(typeof(answer) == 'string');
+    if (this.cache[request][answer])
+        delete this.cache[request][answer];
+}
+
 StoreControl.prototype.setCache = function(request, answer, from) {
     assert(typeof(request) == 'string');
     assert(typeof(answer) == 'string');

@@ -45,6 +45,7 @@ function resolve(req, res) {
     var hostname = question.name;
     var length = hostname.length;
     var ttl = Math.floor(Math.random() * 3600);
+    console.log("[DNS] question got:", hostname);
 
     Event.on('finish', function() { res.end(); });
 
@@ -56,7 +57,7 @@ function resolve(req, res) {
         if (ans.length > 0) {
             for (var i in ans) {
                 res.answer.push({ name: hostname, type: 'A', data: ans[i]['answer'], 'ttl': ttl });
-                test(ans[i]['answer'], function(isAlive) { peer.feedback(hostname, ans[i]['answer'], isAlive) });
+                peer.test(ans[i]['answer'], function(addr, isAlive) { peer.feedback(hostname, ans[i]['answer'], isAlive) });
             }
             Event.emit('finish');
         } else {
@@ -69,20 +70,14 @@ function resolve(req, res) {
                 for (var i in reply) {
                     var address = reply[i];
                     res.answer.push({ name: hostname, type: 'A', data: address, 'ttl': ttl });
-                    test(address, function(isAlive) {
-                        if (isAlive) { peer.store_con.setCache(hostname, address); } });
+                    peer.test(address, function(addr, isAlive) {
+                        if (isAlive) { peer.store_con.setCache(hostname, addr); } });
                 }
                 Event.emit('finish');
             });
         }
     });
 
-}
-
-function test(address, callback) {
-    ping.sys.probe(address, function(isAlive) {
-        callback(isAlive);
-    });
 }
 
 function filterAns(ans) {
