@@ -35,7 +35,7 @@ StoreControl.prototype.generateRecommend = function(foreigns){
 StoreControl.prototype.updateTrustLocal = function(id,incre){
     var trust = this.getTrustLocalRaw(id);
     var new_trust = compute.increment(trust,incre);
-    this.setTrust(id,trust);
+    this.setTrust(id,new_trust);
 }
 
 StoreControl.prototype.saveJSON = function(path, data) {
@@ -56,7 +56,6 @@ StoreControl.prototype.saveRecords = function() {
 StoreControl.prototype.setCache = function(request, answer, from) {
     assert(typeof(request) == 'string');
     assert(typeof(answer) == 'string');
-
     if (!from) {
         from = this.rsa.getPubKey();
     }
@@ -105,7 +104,7 @@ StoreControl.prototype.getTrustLocalRaw = function(id) {
 	//return raw fractions of trust
     assert(typeof(id) == 'string');
     if (id == this.rsa.getPubKey()) {
-        return [99999999,1];
+        return [1,1];
     } else {
         if (this.local_trust[id])
             return this.local_trust[id];
@@ -116,6 +115,9 @@ StoreControl.prototype.getTrustLocalRaw = function(id) {
 
 StoreControl.prototype.getTrust = function(id){ 
 	//return the value of trust
+   if (id == this.rsa.getPubKey()) {
+        return 1;
+    } //
 	var fraction = this.getTrustLocalRaw(id);
     return compute.lookup(id,this.local_trust,this.recommend);
 }
@@ -133,6 +135,8 @@ StoreControl.prototype.getTrustLocal = function(id){
 
 StoreControl.prototype.setTrust = function(id, trust) {
     assert(typeof(id) == 'string');
+    if (id == this.rsa.getPubKey())
+        return;
     this.local_trust[id] = trust;
 }
 

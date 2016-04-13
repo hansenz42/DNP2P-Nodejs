@@ -9,12 +9,26 @@ const ping = require('ping');
 const p2p = require('./p2p.js');
 const assert = require('assert');
 const EventEmitter = require('events');
+var os = require('os');
 
 var Event = new EventEmitter;
 
+var interfaces = os.networkInterfaces();
+var local_addresses = [];
+for (var k in interfaces) {
+    for (var k2 in interfaces[k]) {
+        var addr = interfaces[k][k2];
+        if (addr.family === 'IPv4' && !addr.internal) {
+            local_addresses.push(addr.address);
+        }
+    }
+}
+
+var local_address = local_addresses[0];
+
 var settings = JSON.parse(fs.readFileSync(SETTING_PATH));
 var servers = settings['system_dns'].concat(settings['backup_dns']);
-var peer = new p2p('localhost', PEER_PORT,settings['seed_peers']);
+var peer = new p2p(local_address, PEER_PORT,settings['seed_peers']);
 dns.setServers(servers);
 
 var server = dnsd.createServer(resolve);
@@ -32,25 +46,27 @@ function resolve(req, res) {
     peer.requestDomain(hostname, function(ret_hostname, ans) {
         assert(ret_hostname == hostname);
         assert(Array.isArray(ans));
-        console.log("question resolved");
-        console.log(ret_hostname,ans);
+        console.log("[DNS] question resolved", ret_hostname, ans);
         if (ans.length > 0) {
             for (var i in ans) {
                 res.answer.push({ name: hostname, type: 'A', data: ans[i]['answer'], 'ttl': ttl });     
-                test(ans[i],function(isAilve){peer.feedback(hostname,ans[i]['answer'],isAilve)});
+                test(ans[i]['answer'],function(isAlive){peer.feedback(hostname,ans[i]['answer'],isAlive)});
             }
             Event.emit('finish');
         } else {
-            dns.lookup(hostname, (err, reply, family) => {
+            dns.resolve(hostname, (err, reply) => {
                 if (err) { 
                     consonle.log(err);
                     return; 
                 }
-                var address = reply['address'] || reply;
-                console.log('legacy dns: '+address);
-                res.answer.push({ name: hostname, type: 'A', data: address, 'ttl': ttl });
+                console.log('[DNS] answer from legacy DNS: ',reply);
+                for (var i in reply)
+                {
+                    var address = reply[i];
+                    res.answer.push({ name: hostname, type: 'A', data: address, 'ttl': ttl });
+                    test(address, function(isAlive){if(isAlive) {peer.store_con.setCache(hostname,address);}});
+                }
                 Event.emit('finish');
-                test(address, function(isAilve){if(isAlive) peer.store_con.setCache(hostname,address);});
             });
         }
     });

@@ -1,7 +1,14 @@
-const compute = require('./trust_compute.js');
+var os = require('os');
 
-var local = {"1":[40,50],"2":[50,60],"3":[70,80]};
-var foreign = [{"1":[40,50],"2":[50,60],"3":[70,80],"4":[80,90]},{"1":[2,30],"2":[50,60],"4":[20,50]}]
+var interfaces = os.networkInterfaces();
+var addresses = [];
+for (var k in interfaces) {
+    for (var k2 in interfaces[k]) {
+        var address = interfaces[k][k2];
+        if (address.family === 'IPv4' && !address.internal) {
+            addresses.push(address.address);
+        }
+    }
+}
 
-var rec_trust = compute.recommend(local,foreign);
-console.log(compute.lookup('4',local,rec_trust));
+console.log(addresses);
