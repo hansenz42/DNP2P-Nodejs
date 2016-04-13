@@ -23,7 +23,6 @@ function StoreControl(rsa) {
 }
 
 StoreControl.prototype.generateRecommend = function(foreigns){
-    console.log("foreigns:",foreigns);
     for (var i in foreigns){
         if (_.isEmpty(foreigns[i]))
             delete foreigns[i]

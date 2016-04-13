@@ -19,7 +19,7 @@ const IGNORE_TIMEOUT = 10000;
 const WAIT_TIMEOUT = 2000;
 
 // Other Settings
-const HOUSEKEEP_INTERVAL = 15000;
+const HOUSEKEEP_INTERVAL = 30000;
 const REQUEST_TTL = 10;
 const MIN_PEERS = 4;
 const MAX_PEERS = 10;
@@ -79,8 +79,8 @@ PeerServer.prototype.getReputation = function() {
 }
 
 PeerServer.prototype.addPeer = function(peer) {
-    if (peer['host']=="localhost"){
-        peer['host'] = '127.0.0.1';
+    if (peer['host']=="localhost" || peer['host'] == '127.0.0.1'){
+        peer['host'] = this.peer.self.host;
     }
     for (var ind in this.peer_list) {
         if (this.peer_list[ind]['host'] == peer['host'] && this.peer_list[ind]['port'] == peer['port'])
@@ -98,7 +98,7 @@ PeerServer.prototype.maintain = function() {
     this.cleanPeer();
     console.log('[P2P] alive connected peers ' + this.peer_list.length);
     if (this.peer_list.length == 0)
-        console.log('[P2P] WARNING this peer is lonely forever, you need to start over with new seed peers');
+        console.log('[P2P] WARNING this peer is lonely, you need to start over with new seed peers');
     else
         console.log(this.peer_list);
     if (this.peer_list.length < MIN_PEERS)
