@@ -19,7 +19,7 @@ const IGNORE_TIMEOUT = 10000;
 const WAIT_TIMEOUT = 2000;
 
 // Other Settings
-const HOUSEKEEP_INTERVAL = 30000;
+const HOUSEKEEP_INTERVAL = 5000;
 const REQUEST_TTL = 10;
 const MIN_PEERS = 4;
 const MAX_PEERS = 10;
@@ -38,7 +38,11 @@ const ping = require('ping');
 
 var RespondEvent = new EventEmitter();
 
-function PeerServer(address, port, seeds) {
+function PeerServer(address, port, seeds, trust_threshold) {
+    if (!trust_threshold) {
+        trust_threshold = 0.3;
+    }
+    this.trust_threshold = trust_threshold;
     assert(Array.isArray(seeds));
     this.rsa = new rsa();
     this.store_con = new store(this.rsa);
@@ -48,7 +52,11 @@ function PeerServer(address, port, seeds) {
     this.peer.handle.answer = answer.bind(this);
     this.peer.handle.exchangeTrust = exchangeTrust.bind(this);
     this.peer.handle.alive = alive.bind(this);
-    this.peer_list = seeds;
+    this.peer_list = [];
+    for (var i in seeds) {
+        this.addPeer(seeds[i]);
+    }
+    this.cleanPeer();
     this.ignore_list = {};
 
     setInterval(function() { this.maintain(); }.bind(this), HOUSEKEEP_INTERVAL);
@@ -67,7 +75,7 @@ PeerServer.prototype.updatePeerList = function() {
     this.searchNeighbor('handle/exchangePeer', {}, function(foreign_peers) {
         for (var i in foreign_peers) {
             if (this.peer_list.length <= MAX_PEERS) {
-                this.peer_list.push(foreign_peers[i]);
+                this.addPeer(foreign_peers[i]);
             }
         }
     }.bind(this));
@@ -86,9 +94,13 @@ PeerServer.prototype.getReputation = function() {
 }
 
 PeerServer.prototype.addPeer = function(peer) {
+    if (!peer)
+        return
     if (peer['host'] == "localhost" || peer['host'] == '127.0.0.1') {
         peer['host'] = this.peer.self.host;
     }
+    if (peer['host'] == this.peer.self.host && peer['port'] == this.peer.self.port)
+        return;
     for (var ind in this.peer_list) {
         if (this.peer_list[ind]['host'] == peer['host'] && this.peer_list[ind]['port'] == peer['port'])
             return;
@@ -110,6 +122,7 @@ PeerServer.prototype.maintain = function() {
         console.log(this.peer_list);
     if (this.peer_list.length < MIN_PEERS)
         this.updatePeerList();
+    this.cleanPeer();
     this.store_con.saveRecords();
     this.getReputation();
 }
@@ -189,8 +202,19 @@ PeerServer.prototype.searchNeighbor = function(remote_cmd, message, callback) {
 }
 
 PeerServer.prototype.replyRequest = function(request, answer, to_peer) {
-    if (_isEqual(to_peer, { host: this.peer.self.host, port: this.peer.self.port }))
+    if (_.isEqual(to_peer, { host: this.peer.self.host, port: this.peer.self.port }))
         return;
+    if (answer['trust'] <= this.trust_threshold)
+        return;
+
+    for (var i in answer) {
+        this.test(answer[i]['answer'], function(addr, isAlive) {
+            console.log(addr);
+            this.feedback(request, addr, isAlive);
+        }.bind(this));
+    }
+
+
     var message = { request: request, answer: answer };
     var sig = this.rsa.sign(message);
     this.peer.remote(to_peer).run('handle/answer', {
@@ -262,7 +286,6 @@ function search(payload, done) {
     assert(request);
     assert(respondTo);
     assert(ttl);
-    console.log("[P2P] got request:", request, respondTo);
 
     if (this.checkIgnore(request, respondTo)) {
         done(null, 'ignored');
@@ -292,7 +315,7 @@ function search(payload, done) {
 
 function exchangePeer(payload, done) {
     //return new neighbor to sender
-    done(null, this.store_con.peer_list);
+    done(null, this.peer_list);
 }
 
 function answer(payload, done) {
@@ -310,9 +333,7 @@ function answer(payload, done) {
     var request = mess['request'];
     var answer_li = mess['answer'];
     for (var i in answer_li)
-        this.test(answer_li[i]['answer'],function(addr, isAlive){
-            this.store_con.setCache(request, addr, pubkey);
-        })
+        this.store_con.setCache(request, answer_li[i]['answer'], pubkey);
     RespondEvent.emit('answer', request, answer_li, pubkey);
     done(null, 'answer got');
 }

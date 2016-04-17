@@ -33,7 +33,7 @@ var servers = settings['system_dns'].concat(settings['backup_dns']);
 TRUST_THRESHOLD = settings['trust_threshold'];
 PEER_PORT = settings['peer_port'];
 DNS_PORT = settings['dns_port'];
-var peer = new p2p(local_address, PEER_PORT, settings['seed_peers']);
+var peer = new p2p(local_address, PEER_PORT, settings['seed_peers'], TRUST_THRESHOLD);
 dns.setServers(servers);
 
 var server = dnsd.createServer(resolve);
@@ -53,11 +53,10 @@ function resolve(req, res) {
         assert(ret_hostname == hostname);
         assert(Array.isArray(ans));
         console.log("[DNS] question resolved", ret_hostname, ans);
-        ans = filterAns(ans);
         if (ans.length > 0) {
             for (var i in ans) {
                 res.answer.push({ name: hostname, type: 'A', data: ans[i]['answer'], 'ttl': ttl });
-                peer.test(ans[i]['answer'], function(addr, isAlive) { peer.feedback(hostname, ans[i]['answer'], isAlive) });
+                peer.test(ans[i]['answer'], function(addr, isAlive) { peer.feedback(hostname, addr, isAlive) });
             }
             Event.emit('finish');
         } else {
@@ -71,7 +70,8 @@ function resolve(req, res) {
                     var address = reply[i];
                     res.answer.push({ name: hostname, type: 'A', data: address, 'ttl': ttl });
                     peer.test(address, function(addr, isAlive) {
-                        if (isAlive) { peer.store_con.setCache(hostname, addr); } });
+                        if (isAlive) { peer.store_con.setCache(hostname, addr); }
+                    });
                 }
                 Event.emit('finish');
             });
@@ -86,6 +86,6 @@ function filterAns(ans) {
             delete ans[i];
         }
     }
-    _.compact(ans);
+    ans = _.compact(ans);
     return ans;
 }

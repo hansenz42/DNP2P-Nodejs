@@ -1,5 +1,5 @@
 const ALPHA = 0.2;
-const DECAY = 0.5;
+const DECAY = 0.7;
 
 const _ = require('underscore');
 const assert = require('assert');

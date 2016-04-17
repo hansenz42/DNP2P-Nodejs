@@ -1,3 +1,4 @@
+const SETTING_PATH = 'settings.json';
 const p2p = require('./p2p.js');
 const fs = require('fs');
 var os = require('os');

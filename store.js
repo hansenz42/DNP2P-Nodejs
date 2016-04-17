@@ -43,7 +43,12 @@ StoreControl.prototype.saveJSON = function(path, data) {
 }
 
 StoreControl.prototype.loadJSON = function(path) {
-    var raw = fs.readFileSync(path);
+    try{
+        var raw = fs.readFileSync(path);
+    }catch(err){
+        console.log(err);
+        return {};
+    }
     return JSON.parse(raw);
 }
 
