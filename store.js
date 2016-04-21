@@ -115,12 +115,12 @@ StoreControl.prototype.getTrustLocalRaw = function(id) {
 	//return raw fractions of trust
     assert(typeof(id) == 'string');
     if (id == this.rsa.getPubKey()) {
-        return [1,1];
+        return [1,1,99999];
     } else {
         if (this.local_trust[id])
             return this.local_trust[id];
         else
-            return [0,0];
+            return [0,0,0];
     }
 }
 
@@ -130,19 +130,20 @@ StoreControl.prototype.getTrust = function(id){
         return 1;
     } //
 	var fraction = this.getTrustLocalRaw(id);
+    console.log("fraction",fraction);
     return compute.lookup(id,this.local_trust,this.recommend);
 }
 
-StoreControl.prototype.getTrustLocal = function(id){
-    var fraction = this.getTrustLocalRaw(id);
-    if (fraction)
-        if (fraction[1]==0)
-            return 0;
-        else
-            return fraction[0]/fraction[1];
-    else
-        return 0;
-}
+// StoreControl.prototype.getTrustLocal = function(id){
+//     var fraction = this.getTrustLocalRaw(id);
+//     if (fraction)
+//         if (fraction[1]==0)
+//             return 0;
+//         else
+//             return fraction[0]/fraction[1];
+//     else
+//         return 0;
+// }
 
 StoreControl.prototype.setTrust = function(id, trust) {
     assert(typeof(id) == 'string');

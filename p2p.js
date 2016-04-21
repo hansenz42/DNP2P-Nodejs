@@ -14,13 +14,13 @@ Return: Trust list
 */
 
 // Timeout Settings
-const ANSWER_TIMEOUT = 50;
+const ANSWER_TIMEOUT = 40;
 const CHECK_REPLY_INTERVAL = 20;
 const IGNORE_TIMEOUT = 10000;
 const WAIT_TIMEOUT = 2000;
 
 // Other Settings
-const HOUSEKEEP_INTERVAL = 5000;
+const HOUSEKEEP_INTERVAL = 15000;
 const REQUEST_TTL = 10;
 const MIN_PEERS = 4;
 const MAX_PEERS = 10;
@@ -53,13 +53,13 @@ function PeerServer(address, port, seeds, trust_threshold) {
     this.peer.handle.answer = answer.bind(this);
     this.peer.handle.exchangeTrust = exchangeTrust.bind(this);
     this.peer.handle.alive = alive.bind(this);
+    this.ignore_list = {};
     this.peer_list = [];
     for (var i in seeds) {
         this.addPeer(seeds[i]);
     }
-    this.cleanPeer();
-    this.ignore_list = {};
 
+    this.maintain();
     setInterval(function() { this.maintain(); }.bind(this), HOUSEKEEP_INTERVAL);
     console.log("[P2P] P2P peer running at " + address + ':' + port);
 }
