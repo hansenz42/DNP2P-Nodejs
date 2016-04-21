@@ -14,7 +14,8 @@ Return: Trust list
 */
 
 // Timeout Settings
-const ANSWER_TIMEOUT = 500;
+const ANSWER_TIMEOUT = 50;
+const CHECK_REPLY_INTERVAL = 20;
 const IGNORE_TIMEOUT = 10000;
 const WAIT_TIMEOUT = 2000;
 
@@ -144,6 +145,7 @@ PeerServer.prototype.requestDomain = function(request, callback) {
     var local_answer = this.store_con.findGoodCache(request);
     console.log("[P2P] local answer: ", local_answer);
     var remote_answer = [];
+    var last_received_time = new Date().getTime();
     var message = {
         request: request,
         respondTo: { host: this.peer.self.host, port: this.peer.self.port },
@@ -157,15 +159,23 @@ PeerServer.prototype.requestDomain = function(request, callback) {
         for (var ind in answer_li) {
             remote_answer.push({ answer: answer_li[ind]['answer'], trust: trust });
         }
+        last_received_time = new Date().getTime();
     }.bind(this);
 
     RespondEvent.on('answer', resolveAnswer);
-    setTimeout(() => {
-        RespondEvent.removeListener('answer', resolveAnswer);
-        console.log("[P2P] remote answer: ", remote_answer);
-        var answers = local_answer.concat(remote_answer);
-        callback(request, shrinkAnswer(answers));
-    }, ANSWER_TIMEOUT);
+
+    var intervalid = setInterval(function(){
+        var now = new Date().getTime();
+        if (now - last_received_time > ANSWER_TIMEOUT){
+            if (intervalid){
+                clearInterval(intervalid);
+            }
+            RespondEvent.removeListener('answer', resolveAnswer);
+            console.log("[P2P] remote answer: ", remote_answer);
+            var answers = local_answer.concat(remote_answer);
+            callback(request, shrinkAnswer(answers));
+        }
+    },CHECK_REPLY_INTERVAL);
 
 }
 

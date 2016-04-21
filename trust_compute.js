@@ -27,7 +27,8 @@ function calculatepair(local_list, foreign_list) {
     var sum = 0;
     for (var i in common_pairs) {
         var c = common_pairs[i];
-        sum = ((c[0][0] / c[0][1])-(c[1][0]/c[1][1])) * ((c[0][0] / c[0][1])-(c[1][0]/c[1][1])) + sum;
+        var add = ((c[0][0] / c[0][1])-(c[1][0]/c[1][1])) * ((c[0][0] / c[0][1])-(c[1][0]/c[1][1]));
+        sum = sum + add;
         // console.log('sum',sum);
     }
     sum = sum / num_common;
