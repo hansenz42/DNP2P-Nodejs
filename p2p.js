@@ -20,7 +20,7 @@ const IGNORE_TIMEOUT = 10000;
 const WAIT_TIMEOUT = 2000;
 
 // Other Settings
-const HOUSEKEEP_INTERVAL = 15000;
+const HOUSEKEEP_INTERVAL = 20000;
 const REQUEST_TTL = 10;
 const MIN_PEERS = 4;
 const MAX_PEERS = 10;
@@ -106,7 +106,11 @@ PeerServer.prototype.addPeer = function(peer) {
         if (this.peer_list[ind]['host'] == peer['host'] && this.peer_list[ind]['port'] == peer['port'])
             return;
     }
-    this.peer_list.push(peer);
+    this.peer.remote(peer).run('handle/alive', {host: this.peer.self.host, port: this.peer.self.port}, function(err, result) {
+        if (!err){
+            this.peer_list.push(peer);
+        }
+    }.bind(this));
 }
 
 PeerServer.prototype.removePeer = function(ind) {
@@ -336,6 +340,7 @@ function answer(payload, done) {
     var pubkey = payload['public_key'];
     var vaild = this.rsa.verifyExternal(mess, signature, pubkey);
     console.log("[P2P] got answer: ", mess);
+    console.log("[STAT] Size:,", JSON.stringify(payload).length, " Time:", new Date().getTime());
     if (!vaild) {
         done(null, "You LIAR!!!");
         return;
@@ -358,3 +363,5 @@ function alive(payload, done) {
 }
 
 module.exports = PeerServer;
+
+
