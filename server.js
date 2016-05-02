@@ -47,7 +47,12 @@ function resolve(req, res) {
     var ttl = Math.floor(Math.random() * 3600);
     console.log("[DNS] question got:", hostname);
 
-    Event.on('finish', function() { res.end(); });
+    var end = function (){
+        res.end();
+        Event.removeListener('finish',end);
+    };
+
+    Event.on('finish', end);
 
     peer.requestDomain(hostname, function(ret_hostname, ans) {
         assert(ret_hostname == hostname);
@@ -62,7 +67,7 @@ function resolve(req, res) {
         } else {
             dns.resolve(hostname, (err, reply) => {
                 if (err) {
-                    consonle.log(err);
+                    console.log(err);
                     return;
                 }
                 console.log('[DNS] answer from legacy DNS: ', reply);

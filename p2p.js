@@ -14,7 +14,7 @@ Return: Trust list
 */
 
 // Timeout Settings
-const ANSWER_TIMEOUT = 40;
+const ANSWER_TIMEOUT = 200;
 const CHECK_REPLY_INTERVAL = 20;
 const IGNORE_TIMEOUT = 10000;
 const WAIT_TIMEOUT = 2000;
@@ -102,12 +102,12 @@ PeerServer.prototype.addPeer = function(peer) {
     }
     if (peer['host'] == this.peer.self.host && peer['port'] == this.peer.self.port)
         return;
-    for (var ind in this.peer_list) {
-        if (this.peer_list[ind]['host'] == peer['host'] && this.peer_list[ind]['port'] == peer['port'])
-            return;
-    }
-    this.peer.remote(peer).run('handle/alive', {host: this.peer.self.host, port: this.peer.self.port}, function(err, result) {
-        if (!err){
+    this.peer.remote(peer).run('handle/alive', { host: this.peer.self.host, port: this.peer.self.port }, function(err, result) {
+        if (!err) {
+            for (var ind in this.peer_list) {
+                if (this.peer_list[ind]['host'] == peer['host'] && this.peer_list[ind]['port'] == peer['port'])
+                    return;
+            }
             this.peer_list.push(peer);
         }
     }.bind(this));
@@ -249,7 +249,7 @@ PeerServer.prototype.feedback = function(request, answer, is_good) {
         var incre = 1;
     else {
         var incre = 0;
-        this.store_con.delCache(request, answer);
+//        this.store_con.delCache(request, answer);
     }
     var peers = this.store_con.getPeer(request, answer);
     if (!peers)
@@ -301,6 +301,8 @@ function search(payload, done) {
     assert(respondTo);
     assert(ttl);
 
+    console.log("[STAT] Flood Size:,", JSON.stringify(payload).length, " Time:", new Date().getTime());
+
     if (this.checkIgnore(request, respondTo)) {
         done(null, 'ignored');
         return;
@@ -340,7 +342,7 @@ function answer(payload, done) {
     var pubkey = payload['public_key'];
     var vaild = this.rsa.verifyExternal(mess, signature, pubkey);
     console.log("[P2P] got answer: ", mess);
-    console.log("[STAT] Size:,", JSON.stringify(payload).length, " Time:", new Date().getTime());
+    console.log("[STAT] Answer Size:,", JSON.stringify(payload).length, " Time:", new Date().getTime());
     if (!vaild) {
         done(null, "You LIAR!!!");
         return;
@@ -363,5 +365,3 @@ function alive(payload, done) {
 }
 
 module.exports = PeerServer;
-
-

@@ -1,0 +1,537 @@
+[RSA] Loading Keys
+[P2P STORE] import trust list {}
+[P2P STORE] import cache { 'google.com': { '216.58.192.174': [ '-----BEGIN RSA PUBLIC KEY-----\nMEgCQQCSeLoLcLYVXnRHFrYef3zUuScznhD8HyPd/YmUGSWgH+ax8JME3P6F35ZE\nh8/+MNq47nw3uXZxw+H7dZpjhY5RAgMBAAE=\n-----END RSA PUBLIC KEY-----' ] } }
+[P2P] housekeeping
+[P2P] alive connected peers 0
+[P2P] WARNING this peer is lonely, you need to start over with new seed peers
+[P2P] P2P peer running at 192.168.1.101:5555
+DNS Server running at localhost:53
+{"pid":34427,"id":0,"timestamp":1462069350724,"level":"info","message":"Server started.","module":{"name":"p2p","version":"0.10.2"},"source":"/Users/hanchengzheng/Documents/dnp2p/node_modules/p2p/lib/p2p.js","metadata":{"endpoint":{"host":"192.168.1.101","port":5555,"id":"87c8f789e19094fc9292daff05630813797f6d0e"},"status":"lonely"}}
+[STAT] Flood Size:, 82  Time: 1462069357601
+[STAT] Flood Size:, 82  Time: 1462069357650
+[STAT] Flood Size:, 82  Time: 1462069358700
+[STAT] Flood Size:, 82  Time: 1462069358731
+[STAT] Flood Size:, 82  Time: 1462069358741
+[STAT] Flood Size:, 82  Time: 1462069358885
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069363726
+[STAT] Flood Size:, 82  Time: 1462069363887
+[STAT] Flood Size:, 82  Time: 1462069367715
+[STAT] Flood Size:, 82  Time: 1462069367744
+[STAT] Flood Size:, 82  Time: 1462069367755
+[STAT] Flood Size:, 82  Time: 1462069367779
+[STAT] Flood Size:, 82  Time: 1462069367938
+[STAT] Flood Size:, 82  Time: 1462069368859
+[STAT] Flood Size:, 82  Time: 1462069368894
+[STAT] Flood Size:, 82  Time: 1462069368899
+[STAT] Flood Size:, 82  Time: 1462069368927
+[STAT] Flood Size:, 82  Time: 1462069368942
+[STAT] Flood Size:, 82  Time: 1462069368944
+[STAT] Flood Size:, 82  Time: 1462069368970
+[STAT] Flood Size:, 82  Time: 1462069369280
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[P2P] housekeeping
+[P2P] alive connected peers 5
+[ { host: '192.168.1.100', port: 5555 },
+  { host: '192.168.1.101', port: 5554 },
+  { host: '192.168.1.100', port: 5553 },
+  { host: '192.168.1.100', port: 5554 },
+  { host: '192.168.1.100', port: 5552 } ]
+[STAT] Flood Size:, 82  Time: 1462069370816
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069371722
+[STAT] Flood Size:, 82  Time: 1462069373917
+[STAT] Flood Size:, 82  Time: 1462069373969
+[STAT] Flood Size:, 82  Time: 1462069374501
+[STAT] Flood Size:, 82  Time: 1462069375947
+[STAT] Flood Size:, 82  Time: 1462069376920
+[STAT] Flood Size:, 82  Time: 1462069377949
+[STAT] Flood Size:, 82  Time: 1462069377993
+[STAT] Flood Size:, 82  Time: 1462069378003
+[STAT] Flood Size:, 82  Time: 1462069378087
+[STAT] Flood Size:, 82  Time: 1462069378091
+[STAT] Flood Size:, 82  Time: 1462069378922
+[STAT] Flood Size:, 82  Time: 1462069378991
+[STAT] Flood Size:, 82  Time: 1462069379030
+[STAT] Flood Size:, 82  Time: 1462069379101
+[STAT] Flood Size:, 82  Time: 1462069379103
+[STAT] Flood Size:, 82  Time: 1462069379121
+[STAT] Flood Size:, 82  Time: 1462069379177
+[STAT] Flood Size:, 82  Time: 1462069379489
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069380923
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069381871
+[STAT] Flood Size:, 82  Time: 1462069383941
+[STAT] Flood Size:, 82  Time: 1462069383977
+[STAT] Flood Size:, 82  Time: 1462069384472
+[STAT] Flood Size:, 82  Time: 1462069386045
+[STAT] Flood Size:, 82  Time: 1462069387047
+[STAT] Flood Size:, 82  Time: 1462069388037
+[STAT] Flood Size:, 82  Time: 1462069388064
+[STAT] Flood Size:, 82  Time: 1462069388067
+[STAT] Flood Size:, 82  Time: 1462069388175
+[STAT] Flood Size:, 82  Time: 1462069388206
+[STAT] Flood Size:, 82  Time: 1462069388926
+[STAT] Flood Size:, 82  Time: 1462069389030
+[STAT] Flood Size:, 82  Time: 1462069389065
+[STAT] Flood Size:, 82  Time: 1462069389117
+[STAT] Flood Size:, 82  Time: 1462069389155
+[STAT] Flood Size:, 82  Time: 1462069389219
+[STAT] Flood Size:, 82  Time: 1462069389565
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[P2P] housekeeping
+[P2P] alive connected peers 5
+[ { host: '192.168.1.100', port: 5555 },
+  { host: '192.168.1.101', port: 5554 },
+  { host: '192.168.1.100', port: 5553 },
+  { host: '192.168.1.100', port: 5554 },
+  { host: '192.168.1.100', port: 5552 } ]
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069391077
+[STAT] Flood Size:, 82  Time: 1462069391502
+[STAT] Flood Size:, 82  Time: 1462069392072
+[STAT] Flood Size:, 82  Time: 1462069394013
+[STAT] Flood Size:, 82  Time: 1462069394077
+[STAT] Flood Size:, 82  Time: 1462069394646
+[STAT] Flood Size:, 82  Time: 1462069396400
+[STAT] Flood Size:, 82  Time: 1462069397095
+[STAT] Flood Size:, 82  Time: 1462069398409
+[STAT] Flood Size:, 82  Time: 1462069398458
+[STAT] Flood Size:, 82  Time: 1462069398458
+[STAT] Flood Size:, 82  Time: 1462069398502
+[STAT] Flood Size:, 82  Time: 1462069398541
+[STAT] Flood Size:, 82  Time: 1462069399002
+[STAT] Flood Size:, 82  Time: 1462069399136
+[STAT] Flood Size:, 82  Time: 1462069399195
+[STAT] Flood Size:, 82  Time: 1462069399448
+[STAT] Flood Size:, 82  Time: 1462069399453
+[STAT] Flood Size:, 82  Time: 1462069399493
+[STAT] Flood Size:, 82  Time: 1462069399526
+[STAT] Flood Size:, 82  Time: 1462069399797
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069401332
+[STAT] Flood Size:, 82  Time: 1462069402448
+[STAT] Flood Size:, 82  Time: 1462069404036
+[STAT] Flood Size:, 82  Time: 1462069404265
+[STAT] Flood Size:, 82  Time: 1462069404817
+[STAT] Flood Size:, 82  Time: 1462069406229
+[STAT] Flood Size:, 82  Time: 1462069407178
+[STAT] Flood Size:, 82  Time: 1462069408453
+[STAT] Flood Size:, 82  Time: 1462069408538
+[STAT] Flood Size:, 82  Time: 1462069408546
+[STAT] Flood Size:, 82  Time: 1462069408563
+[STAT] Flood Size:, 82  Time: 1462069408600
+[STAT] Flood Size:, 82  Time: 1462069409033
+[STAT] Flood Size:, 82  Time: 1462069409529
+[STAT] Flood Size:, 82  Time: 1462069409549
+[STAT] Flood Size:, 82  Time: 1462069409551
+[STAT] Flood Size:, 82  Time: 1462069409553
+[STAT] Flood Size:, 82  Time: 1462069409594
+[STAT] Flood Size:, 82  Time: 1462069409612
+[STAT] Flood Size:, 82  Time: 1462069409626
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[P2P] housekeeping
+[P2P] alive connected peers 5
+[ { host: '192.168.1.100', port: 5555 },
+  { host: '192.168.1.101', port: 5554 },
+  { host: '192.168.1.100', port: 5553 },
+  { host: '192.168.1.100', port: 5554 },
+  { host: '192.168.1.100', port: 5552 } ]
+[STAT] Flood Size:, 82  Time: 1462069411187
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069412014
+[STAT] Flood Size:, 82  Time: 1462069414396
+[STAT] Flood Size:, 82  Time: 1462069414435
+[STAT] Flood Size:, 82  Time: 1462069414542
+[STAT] Flood Size:, 82  Time: 1462069416287
+[STAT] Flood Size:, 82  Time: 1462069417240
+[STAT] Flood Size:, 82  Time: 1462069419048
+[STAT] Flood Size:, 82  Time: 1462069419089
+[STAT] Flood Size:, 82  Time: 1462069419099
+[STAT] Flood Size:, 82  Time: 1462069419148
+[STAT] Flood Size:, 82  Time: 1462069419153
+[STAT] Flood Size:, 82  Time: 1462069419193
+[STAT] Flood Size:, 82  Time: 1462069419304
+[STAT] Flood Size:, 82  Time: 1462069419331
+[STAT] Flood Size:, 82  Time: 1462069419398
+[STAT] Flood Size:, 82  Time: 1462069419479
+[STAT] Flood Size:, 82  Time: 1462069419636
+[STAT] Flood Size:, 82  Time: 1462069419661
+[STAT] Flood Size:, 82  Time: 1462069419716
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069421099
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069422082
+[STAT] Flood Size:, 82  Time: 1462069424173
+[STAT] Flood Size:, 82  Time: 1462069424422
+[STAT] Flood Size:, 82  Time: 1462069424607
+[STAT] Flood Size:, 82  Time: 1462069426110
+[STAT] Flood Size:, 82  Time: 1462069427040
+[STAT] Flood Size:, 82  Time: 1462069429159
+[STAT] Flood Size:, 82  Time: 1462069429215
+[STAT] Flood Size:, 82  Time: 1462069429287
+[STAT] Flood Size:, 82  Time: 1462069429376
+[STAT] Flood Size:, 82  Time: 1462069429379
+[STAT] Flood Size:, 82  Time: 1462069429435
+[STAT] Flood Size:, 82  Time: 1462069429534
+[STAT] Flood Size:, 82  Time: 1462069429633
+[STAT] Flood Size:, 82  Time: 1462069429681
+[STAT] Flood Size:, 82  Time: 1462069429746
+[STAT] Flood Size:, 82  Time: 1462069429817
+[STAT] Flood Size:, 82  Time: 1462069430035
+[P2P] housekeeping
+[P2P] alive connected peers 5
+[ { host: '192.168.1.100', port: 5555 },
+  { host: '192.168.1.101', port: 5554 },
+  { host: '192.168.1.100', port: 5553 },
+  { host: '192.168.1.100', port: 5554 },
+  { host: '192.168.1.100', port: 5552 } ]
+[STAT] Flood Size:, 82  Time: 1462069431002
+[STAT] Flood Size:, 82  Time: 1462069431168
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069431980
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069434080
+[STAT] Flood Size:, 82  Time: 1462069434580
+[STAT] Flood Size:, 82  Time: 1462069434595
+[STAT] Flood Size:, 82  Time: 1462069435965
+[STAT] Flood Size:, 82  Time: 1462069436967
+[STAT] Flood Size:, 82  Time: 1462069439150
+[STAT] Flood Size:, 82  Time: 1462069439168
+[STAT] Flood Size:, 82  Time: 1462069439280
+[STAT] Flood Size:, 82  Time: 1462069439335
+[STAT] Flood Size:, 82  Time: 1462069439337
+[STAT] Flood Size:, 82  Time: 1462069439472
+[STAT] Flood Size:, 82  Time: 1462069439602
+[STAT] Flood Size:, 82  Time: 1462069439681
+[STAT] Flood Size:, 82  Time: 1462069439691
+[STAT] Flood Size:, 82  Time: 1462069439765
+[STAT] Flood Size:, 82  Time: 1462069439811
+[STAT] Flood Size:, 82  Time: 1462069439856
+[STAT] Flood Size:, 82  Time: 1462069441058
+[STAT] Flood Size:, 82  Time: 1462069441108
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069442037
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069444158
+[STAT] Flood Size:, 82  Time: 1462069444511
+[STAT] Flood Size:, 82  Time: 1462069444613
+[STAT] Flood Size:, 82  Time: 1462069446080
+[STAT] Flood Size:, 82  Time: 1462069447169
+[STAT] Flood Size:, 82  Time: 1462069449126
+[STAT] Flood Size:, 82  Time: 1462069449250
+[STAT] Flood Size:, 82  Time: 1462069449497
+[STAT] Flood Size:, 82  Time: 1462069449506
+[STAT] Flood Size:, 82  Time: 1462069449512
+[STAT] Flood Size:, 82  Time: 1462069449532
+[STAT] Flood Size:, 82  Time: 1462069449591
+[STAT] Flood Size:, 82  Time: 1462069449829
+[STAT] Flood Size:, 82  Time: 1462069449855
+[STAT] Flood Size:, 82  Time: 1462069449866
+[STAT] Flood Size:, 82  Time: 1462069449869
+[STAT] Flood Size:, 82  Time: 1462069449962
+[P2P] housekeeping
+[P2P] alive connected peers 5
+[ { host: '192.168.1.100', port: 5555 },
+  { host: '192.168.1.101', port: 5554 },
+  { host: '192.168.1.100', port: 5553 },
+  { host: '192.168.1.100', port: 5554 },
+  { host: '192.168.1.100', port: 5552 } ]
+[STAT] Flood Size:, 82  Time: 1462069451037
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069452029
+[STAT] Flood Size:, 82  Time: 1462069452068
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069454174
+[STAT] Flood Size:, 82  Time: 1462069454509
+[STAT] Flood Size:, 82  Time: 1462069454600
+[STAT] Flood Size:, 82  Time: 1462069456078
+[STAT] Flood Size:, 82  Time: 1462069457054
+[STAT] Flood Size:, 82  Time: 1462069459188
+[STAT] Flood Size:, 82  Time: 1462069459271
+[STAT] Flood Size:, 82  Time: 1462069459425
+[STAT] Flood Size:, 82  Time: 1462069459455
+[STAT] Flood Size:, 82  Time: 1462069459581
+[STAT] Flood Size:, 82  Time: 1462069459588
+[STAT] Flood Size:, 82  Time: 1462069459598
+[STAT] Flood Size:, 82  Time: 1462069459892
+[STAT] Flood Size:, 82  Time: 1462069459922
+[STAT] Flood Size:, 82  Time: 1462069460018
+[STAT] Flood Size:, 82  Time: 1462069460029
+[STAT] Flood Size:, 82  Time: 1462069460093
+[STAT] Flood Size:, 82  Time: 1462069461121
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069462257
+[STAT] Flood Size:, 82  Time: 1462069462315
+[STAT] Flood Size:, 82  Time: 1462069464193
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069464685
+[STAT] Flood Size:, 82  Time: 1462069464687
+[STAT] Flood Size:, 82  Time: 1462069466070
+[STAT] Flood Size:, 82  Time: 1462069467101
+[STAT] Flood Size:, 82  Time: 1462069469347
+[STAT] Flood Size:, 82  Time: 1462069469392
+[STAT] Flood Size:, 82  Time: 1462069469518
+[STAT] Flood Size:, 82  Time: 1462069469519
+[STAT] Flood Size:, 82  Time: 1462069469683
+[STAT] Flood Size:, 82  Time: 1462069469683
+[STAT] Flood Size:, 82  Time: 1462069469700
+[P2P] housekeeping
+[P2P] alive connected peers 5
+[ { host: '192.168.1.100', port: 5555 },
+  { host: '192.168.1.101', port: 5554 },
+  { host: '192.168.1.100', port: 5553 },
+  { host: '192.168.1.100', port: 5554 },
+  { host: '192.168.1.100', port: 5552 } ]
+[STAT] Flood Size:, 82  Time: 1462069471104
+[STAT] Flood Size:, 82  Time: 1462069472102
+[STAT] Flood Size:, 82  Time: 1462069473046
+[STAT] Flood Size:, 82  Time: 1462069473086
+[STAT] Flood Size:, 82  Time: 1462069473175
+[STAT] Flood Size:, 82  Time: 1462069473181
+[STAT] Flood Size:, 82  Time: 1462069473199
+[STAT] Flood Size:, 82  Time: 1462069474229
+[STAT] Flood Size:, 82  Time: 1462069474298
+[STAT] Flood Size:, 82  Time: 1462069474701
+[STAT] Flood Size:, 82  Time: 1462069474727
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069476142
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069477233
+[STAT] Flood Size:, 82  Time: 1462069479419
+[STAT] Flood Size:, 82  Time: 1462069479519
+[STAT] Flood Size:, 82  Time: 1462069479685
+[STAT] Flood Size:, 82  Time: 1462069479747
+[STAT] Flood Size:, 82  Time: 1462069479756
+[STAT] Flood Size:, 82  Time: 1462069479789
+[STAT] Flood Size:, 82  Time: 1462069481293
+[STAT] Flood Size:, 82  Time: 1462069482146
+[STAT] Flood Size:, 82  Time: 1462069482460
+[STAT] Flood Size:, 82  Time: 1462069483181
+[STAT] Flood Size:, 82  Time: 1462069483238
+[STAT] Flood Size:, 82  Time: 1462069483281
+[STAT] Flood Size:, 82  Time: 1462069483305
+[STAT] Flood Size:, 82  Time: 1462069483371
+[STAT] Flood Size:, 82  Time: 1462069484336
+[STAT] Flood Size:, 82  Time: 1462069484422
+[STAT] Flood Size:, 82  Time: 1462069484834
+[STAT] Flood Size:, 82  Time: 1462069484835
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069486221
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069487262
+[STAT] Flood Size:, 82  Time: 1462069489473
+[STAT] Flood Size:, 82  Time: 1462069489539
+[STAT] Flood Size:, 82  Time: 1462069489730
+[STAT] Flood Size:, 82  Time: 1462069489799
+[STAT] Flood Size:, 82  Time: 1462069489800
+[STAT] Flood Size:, 82  Time: 1462069489855
+[STAT] Flood Size:, 82  Time: 1462069489995
+[P2P] housekeeping
+[P2P] alive connected peers 5
+[ { host: '192.168.1.100', port: 5555 },
+  { host: '192.168.1.101', port: 5554 },
+  { host: '192.168.1.100', port: 5553 },
+  { host: '192.168.1.100', port: 5554 },
+  { host: '192.168.1.100', port: 5552 } ]
+[STAT] Flood Size:, 82  Time: 1462069491193
+[STAT] Flood Size:, 82  Time: 1462069492332
+[STAT] Flood Size:, 82  Time: 1462069493213
+[STAT] Flood Size:, 82  Time: 1462069493311
+[STAT] Flood Size:, 82  Time: 1462069493422
+[STAT] Flood Size:, 82  Time: 1462069493559
+[STAT] Flood Size:, 82  Time: 1462069493607
+[STAT] Flood Size:, 82  Time: 1462069494453
+[STAT] Flood Size:, 82  Time: 1462069494564
+[STAT] Flood Size:, 82  Time: 1462069494798
+[STAT] Flood Size:, 82  Time: 1462069494844
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069496664
+[STAT] Flood Size:, 82  Time: 1462069497427
+[STAT] Flood Size:, 82  Time: 1462069499513
+[STAT] Flood Size:, 82  Time: 1462069499601
+[STAT] Flood Size:, 82  Time: 1462069499804
+[STAT] Flood Size:, 82  Time: 1462069499858
+[STAT] Flood Size:, 82  Time: 1462069499963
+[STAT] Flood Size:, 82  Time: 1462069499998
+[STAT] Flood Size:, 82  Time: 1462069500052
+[STAT] Flood Size:, 82  Time: 1462069501357
+[STAT] Flood Size:, 82  Time: 1462069502365
+[STAT] Flood Size:, 82  Time: 1462069503271
+[STAT] Flood Size:, 82  Time: 1462069503507
+[STAT] Flood Size:, 82  Time: 1462069503755
+[STAT] Flood Size:, 82  Time: 1462069503838
+[STAT] Flood Size:, 82  Time: 1462069504580
+[STAT] Flood Size:, 82  Time: 1462069504636
+[STAT] Flood Size:, 82  Time: 1462069504822
+[STAT] Flood Size:, 82  Time: 1462069505047
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069508099
+[STAT] Flood Size:, 82  Time: 1462069508277
+[STAT] Flood Size:, 82  Time: 1462069508376
+[STAT] Flood Size:, 82  Time: 1462069509766
+[STAT] Flood Size:, 82  Time: 1462069509954
+[STAT] Flood Size:, 82  Time: 1462069510066
+[STAT] Flood Size:, 82  Time: 1462069510223
+[STAT] Flood Size:, 82  Time: 1462069510310
+[STAT] Flood Size:, 82  Time: 1462069510389
+[STAT] Flood Size:, 82  Time: 1462069510412
+[P2P] housekeeping
+[P2P] alive connected peers 5
+[ { host: '192.168.1.100', port: 5555 },
+  { host: '192.168.1.101', port: 5554 },
+  { host: '192.168.1.100', port: 5553 },
+  { host: '192.168.1.100', port: 5554 },
+  { host: '192.168.1.100', port: 5552 } ]
+[STAT] Flood Size:, 82  Time: 1462069511634
+[STAT] Flood Size:, 82  Time: 1462069512762
+[STAT] Flood Size:, 82  Time: 1462069513972
+[STAT] Flood Size:, 82  Time: 1462069514141
+[STAT] Flood Size:, 82  Time: 1462069514235
+[STAT] Flood Size:, 82  Time: 1462069514315
+[STAT] Flood Size:, 82  Time: 1462069514432
+[STAT] Flood Size:, 82  Time: 1462069514983
+[STAT] Flood Size:, 82  Time: 1462069515031
+[STAT] Flood Size:, 82  Time: 1462069515363
+[STAT] Flood Size:, 82  Time: 1462069515542
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069516911
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069518088
+[STAT] Flood Size:, 82  Time: 1462069520158
+[STAT] Flood Size:, 82  Time: 1462069520495
+[STAT] Flood Size:, 82  Time: 1462069520645
+[STAT] Flood Size:, 82  Time: 1462069520651
+[STAT] Flood Size:, 82  Time: 1462069520753
+[STAT] Flood Size:, 82  Time: 1462069520803
+[STAT] Flood Size:, 82  Time: 1462069523772
+[STAT] Flood Size:, 82  Time: 1462069524163
+[STAT] Flood Size:, 82  Time: 1462069524328
+[STAT] Flood Size:, 82  Time: 1462069524618
+[STAT] Flood Size:, 82  Time: 1462069524740
+[STAT] Flood Size:, 82  Time: 1462069524768
+[STAT] Flood Size:, 82  Time: 1462069525076
+[STAT] Flood Size:, 82  Time: 1462069525086
+[STAT] Flood Size:, 82  Time: 1462069525146
+[STAT] Flood Size:, 82  Time: 1462069525303
+[STAT] Flood Size:, 82  Time: 1462069525477
+[STAT] Flood Size:, 82  Time: 1462069525621
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069527388
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069528132
+[STAT] Flood Size:, 82  Time: 1462069530076
+[STAT] Flood Size:, 82  Time: 1462069530167
+[STAT] Flood Size:, 82  Time: 1462069530750
+[P2P] housekeeping
+[P2P] alive connected peers 5
+[ { host: '192.168.1.100', port: 5555 },
+  { host: '192.168.1.101', port: 5554 },
+  { host: '192.168.1.100', port: 5553 },
+  { host: '192.168.1.100', port: 5554 },
+  { host: '192.168.1.100', port: 5552 } ]
+[STAT] Flood Size:, 82  Time: 1462069530979
+[STAT] Flood Size:, 82  Time: 1462069531077
+[STAT] Flood Size:, 82  Time: 1462069531136
+[STAT] Flood Size:, 82  Time: 1462069531206
+[STAT] Flood Size:, 82  Time: 1462069532094
+[STAT] Flood Size:, 82  Time: 1462069533247
+[STAT] Flood Size:, 82  Time: 1462069534778
+[STAT] Flood Size:, 82  Time: 1462069534905
+[STAT] Flood Size:, 82  Time: 1462069535264
+[STAT] Flood Size:, 82  Time: 1462069535327
+[STAT] Flood Size:, 82  Time: 1462069535340
+[STAT] Flood Size:, 82  Time: 1462069535415
+[STAT] Flood Size:, 82  Time: 1462069535569
+[STAT] Flood Size:, 82  Time: 1462069535714
+[STAT] Flood Size:, 82  Time: 1462069536016
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069537390
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069538190
+[STAT] Flood Size:, 82  Time: 1462069540034
+[STAT] Flood Size:, 82  Time: 1462069540231
+[STAT] Flood Size:, 82  Time: 1462069540765
+[STAT] Flood Size:, 82  Time: 1462069540773
+[STAT] Flood Size:, 82  Time: 1462069540853
+[STAT] Flood Size:, 82  Time: 1462069541077
+[STAT] Flood Size:, 82  Time: 1462069541078
+[STAT] Flood Size:, 82  Time: 1462069542058
+[STAT] Flood Size:, 82  Time: 1462069542945
+[STAT] Flood Size:, 82  Time: 1462069545165
+[STAT] Flood Size:, 82  Time: 1462069545212
+[STAT] Flood Size:, 82  Time: 1462069545495
+[STAT] Flood Size:, 82  Time: 1462069545910
+[STAT] Flood Size:, 82  Time: 1462069546398
+[STAT] Flood Size:, 82  Time: 1462069546438
+[STAT] Flood Size:, 82  Time: 1462069546440
+[STAT] Flood Size:, 82  Time: 1462069546448
+[STAT] Flood Size:, 82  Time: 1462069546523
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069547545
+[STAT] Flood Size:, 82  Time: 1462069547859
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false
+[STAT] Flood Size:, 82  Time: 1462069550318
+[STAT] Flood Size:, 82  Time: 1462069550345
+[STAT] Flood Size:, 82  Time: 1462069550664
+[P2P] housekeeping
+[P2P] alive connected peers 5
+[ { host: '192.168.1.100', port: 5555 },
+  { host: '192.168.1.101', port: 5554 },
+  { host: '192.168.1.100', port: 5553 },
+  { host: '192.168.1.100', port: 5554 },
+  { host: '192.168.1.100', port: 5552 } ]
+[STAT] Flood Size:, 82  Time: 1462069550957
+[STAT] Flood Size:, 82  Time: 1462069551048
+[STAT] Flood Size:, 82  Time: 1462069551460
+[STAT] Flood Size:, 82  Time: 1462069551462
+[STAT] Flood Size:, 82  Time: 1462069552198
+[STAT] Flood Size:, 82  Time: 1462069553035
+[STAT] Flood Size:, 82  Time: 1462069555387
+[STAT] Flood Size:, 82  Time: 1462069555744
+[STAT] Flood Size:, 82  Time: 1462069555852
+216.58.192.174
+[P2P] feedback: google.com 216.58.192.174 good? false

@@ -43,7 +43,8 @@ function recommend(local, foreigns) {
     // console.log(foreigns);
     var sims = [];
     for (var i in foreigns) {
-        sims.push(getSimilarity(local, foreigns[i]));
+            sims.push(getSimilarity(local, foreigns[i]));
+        }
     }
     // console.log("sims");
     // console.log(sims);
@@ -87,13 +88,14 @@ function lookup(id, local, recommend) {
     		rec_trust = (recommend[id][0]/recommend[id][1]);
         if (recommend[id][2])
             rec_conf_value = recommend[id][2];
-        rec_conf_value = rec_conf_value * ALPHA;
+        rec_conf_value = rec_conf_value * RECOMMEND_CONFIDENCE;
     }
     var rec_conf = rec_conf_value / (rec_conf_value + local_conf_value);
     if (isNaN(rec_conf))
         var ret = 0;
     else
         var ret = (1 - rec_conf) * local_trust + rec_conf * rec_trust;
+    console.log("[TRUST] ID:",id.replace('\n','').replace('\n','').replace('\n','')," Trust:",ret, "Time:", new Date().getTime());
     return ret;
 }
 
